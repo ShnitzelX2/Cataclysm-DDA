@@ -104,6 +104,12 @@ EoCs support mutate_towards directly
 make `u_spawn_item` to support the item group whose subtype is `collection`
 Add u_wants_to_talk/npc_wants_to_talk EOC effects
 Player can eat from camp larder(always). Workers receive spent food from it when being assigned to work (requires NPC needs enabled).
+Integrated ImGui UI framework into Cataclysm, and ported inventory screens to the new framework as a proof-of-concept
+FANGS and FANGS_VAMPIRE mutations now add martial arts techniques rather than being free attacks
+Support similar limbs in armor definitions
+New mutation field "override_look" that allows the character to have the appearance of a monster.
+Creates functionality for liquid attacks and moves boomer bile to use it
+Ritual Circles satisfy spell component requirements
 
 
 ## Content:
@@ -210,6 +216,11 @@ Simulate hair growth over time.
 Add earthworms to the game, as a food source
 Add cougar kittens and fix cougar taming in mods
 Boomers now leave fleshy gibs on detonation```
+Cleanup zombie harvest lists and polish tainted body parts.
+Adds parabolan wool armors
+Add hair dye.
+New flooded basement variants
+Split vehicle part wheel_caster into small and large variants
 
 
 ## Interface:
@@ -264,6 +275,7 @@ Keep displaying selected outfit throughout chargen
 High characters now see fancy smiley faces and exclamations in their message log.
 Can't accidentally select full deconstruction if simple deconstruction is available
 Set priority for containers that have auto whitelisting.
+User now can reset customized keybindings to default
 
 
 ## Mods:
@@ -380,6 +392,25 @@ Fix Brackenwight special attack message
 [Magiclysm] Last Mage on Earth start
 Tamable Wildlife: add Cougars to list of tameables
 [Magiclysm] Add spellcasting proficiencies.
+Sky Island quest & recipe fixes
+Sky Island - waterproof secure storage containers
+[Xedra Evolved] Consolidate more Arvore mutations with triggers into one mutation
+[MoM] Chameleoflage update
+[MoM] Update Metabolic Hyperefficiency
+[Xedra Evolved] Paraclesian altar wall rework
+[Xedra Evolved] Sylph, salamander, and undine mutation consolidation
+[MoM] Update Night Eyes to the NIGHT_VIS enchantment
+[Docs] Alphabetize enchantments in Magic.md
+[Xedra Evolved] Paraclesian altar floor rework 
+[MoM] Update Speed Reader to use READING_SPEED_MULTIPLIER enchantment
+[Xedra Evolved] Update Verdant Armor with new enchantments
+[BombasticPerks] A new playstyle perk: Enchanting Master
+[MoM] Update learning EoCs to reuse condition list
+[Xedra Evolved] Update Paraclesian elemental form sprites
+[Xedra Evolved] More Salamander and Ierde powers
+[Magiclysm] Update goblin teeth to techniques
+[Xedra Evolved] Add GLARE quality to Salamander eyes
+[Xedra Evolved] Add animal friendship traits to Ierde, Undine, and Arvore
 
 
 ## Balance:
@@ -438,6 +469,11 @@ Bring ice axe in line with reality
 Audit remaining magazines (.223, 9mm, .308)
 Update books.json to rebalance religious book spawning
 Retuned frag grenades to be less effective against ballistic armor and lose power over distance faster
+Makes Mixed Smokeless only useful for pyro/explosives
+NPCs wait to steal your stuff until you aren't looking
+Added EOC that boosts spell leveling on cast depends on mana cost
+Remove the odd .30-06 ammo from items that spawn in the map variant of the radio tower.
+Limestone/quicklime audit
 
 
 ## Bugfixes:
@@ -566,6 +602,24 @@ Fix assignment ID's with NECC mapgen EOCs.
 Allows Infrared vision to see through smoke
 [Magiclysm] Fix Peaceful Rest hobby
 NPCs can overeat, starve, and dehydrate to death
+Make Artisans and Gunshow Uniquer
+[Magiclysm] Fix Wash the Wounds Clean
+[Bombastic Perks] Fix perk-choosing crash(?)
+Fixing Android build broken after Imgui integration
+Summoned animals are back to not leaving behind corpses
+Fix recipe_id conflicts in base json files
+Make Rubik recognize that the player has sold items
+fix some bugs for `run_eoc_until`
+Fixes issue where mouse cursor can be disabled in options but still shows
+Disabled ImGui writing to unnecessary imgui.ini file
+[Xedra Evolved] Fix Avalanche Blow
+fix windows with missing header text
+Fixing inconsistencies with the way mouse works in ImGui keybindings screen.
+When a debug error is thrown during drawing, imgui itself throws an exception, crashing the game
+New ImGui popups show at the center of the screen when query_popup::ontop is set to true
+Corrects grapeade item name
+Fixing a regression where popups with buttons aren't showing text
+[MoM] Fix Far Hand's range
 
 
 ## Performance:
@@ -591,6 +645,7 @@ Optimize creature vision checks.
 Optimize hot item function to save ~6.7% of game load time
 Skip MGOAL_Find_Item if the player is busy.
 Avoid wasteful loop in map special road connections
+Less repeatedly spawning item groups when checking consistency
 
 
 ## Infrastructure:
@@ -639,6 +694,10 @@ Effect enchantments can now apply to monsters
 Make JSON formatter replace nbsp with escape sequence
 Update houses to utilize palettes
 Added SMALL_HIDER flag to various monsters.
+Clarify and enforce standards for gun names and variants
+Camps are faction-agnostic (not just linked to player faction)
+JSONize hardcoded hair trimming functions.
+Test cases for player's morale after killing an NPC
 
 
 ## Build:
