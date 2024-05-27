@@ -126,5 +126,9 @@
     "id": "INDOORFLOOR",
     "group_flags": [ "INDOORS" ],
     "rotates_to_flags": [ "WINDOW", "DOOR" ]
+  },
+  {
+    "type": "connect_group",
+    "id": "LIXATUBE"
   }
 ]

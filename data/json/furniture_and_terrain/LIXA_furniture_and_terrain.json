@@ -27,7 +27,6 @@
     "type": "terrain",
     "id": "t_LIXA_tube",
     "name": "laser chamber",
-    "looks_like": "t_sewage_pipe",
     "description": "A large section of metal tubing, balanced on spring supports to prevent any vibration from affecting the laser inside.",
     "symbol": "1",
     "color": "light_gray",
@@ -35,7 +34,9 @@
     "coverage": 50,
     "connect_groups": "INDOORFLOOR",
     "flags": [ "TRANSPARENT", "MOUNTABLE", "PERMEABLE", "THIN_OBSTACLE", "MINEABLE", "UNSTABLE", "INDOORS" ],
-    "bash": {
+    "connect_groups": "LIXATUBE",
+	"connects_to": "LIXATUBE",
+	"bash": {
       "str_min": 30,
       "str_max": 210,
       "sound": "metal screeching!",
@@ -52,7 +53,6 @@
     "description": "A dizzyingly complex series of devices and readouts is on the outside of this machine's casing.  You imagine the inside would be incomprehensible.",
     "symbol": "{",
     "color": "light_gray",
-    "looks_like": "f_machinery_electronic",
     "move_cost": 0,
     "coverage": 50,
     "connect_groups": [ "WALL", "INDOORFLOOR" ],
@@ -100,7 +100,6 @@
     "type": "terrain",
     "id": "t_LIXA_unfolded_tube",
     "name": "unfolded laser chamber",
-    "looks_like": "t_sewage_pipe",
     "description": "You can see the inside surface of this tube, and what it contains.  Thick, slimy red light oozes within it.",
     "symbol": "1",
     "color": "light_gray",
@@ -108,7 +107,9 @@
     "coverage": 50,
     "connect_groups": "INDOORFLOOR",
     "flags": [ "TRANSPARENT", "MOUNTABLE", "PERMEABLE", "INDOORS", "THIN_OBSTACLE", "UNSTABLE", "MINEABLE" ],
-    "bash": {
+    "connect_groups": "LIXATUBE",
+	"connects_to": "LIXATUBE",
+	"bash": {
       "str_min": 7,
       "str_max": 17,
       "sound": "a hollow pop, followed by a sickly wet squelching as congealed light slowly leaks out of the tube.",
@@ -130,7 +131,9 @@
     "coverage": 50,
     "connect_groups": "INDOORFLOOR",
     "flags": [ "TRANSPARENT", "MOUNTABLE", "PERMEABLE", "INDOORS", "THIN_OBSTACLE", "UNSTABLE", "MINEABLE" ],
-    "emissions": [ "emit_congealed_light" ]
+    "connect_groups": "LIXATUBE",
+	"connects_to": "LIXATUBE",
+	"emissions": [ "emit_congealed_light" ]
   },
   {
     "type": "terrain",
@@ -304,6 +307,8 @@
     "move_cost": 3,
     "roof": "t_metal_roof",
     "flags": [ "TRANSPARENT", "FLAMMABLE", "FLAT" ],
+	"connect_groups": "LIXATUBE",
+	"connects_to": "LIXATUBE",
     "deconstruct": {
       "ter_set": "t_metal_floor",
       "items": [
@@ -353,7 +358,6 @@
     "type": "furniture",
     "id": "f_LIXA_electrical_conduit",
     "name": "photonic conduit",
-    "looks_like": "f_electrical_conduit",
     "description": "You can see through the metal casing of this tube, into the blazing light coursing through it.",
     "symbol": "|",
     "color": "light_gray",

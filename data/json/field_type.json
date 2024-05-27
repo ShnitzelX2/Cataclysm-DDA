@@ -1994,8 +1994,7 @@
     "priority": 2,
     "half_life": "10 seconds",
     "phase": "liquid",
-    "display_field": true,
-    "looks_like": "fd_bile"
+    "display_field": true
   },
   {
     "id": "emit_congealed_light",
