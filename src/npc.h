@@ -1461,6 +1461,7 @@ class npc_template
         dialogue_chatbin_snippets snippets;
         translation name_unique;
         translation name_suffix;
+        translation temp_suffix;
         enum class gender : int {
             random,
             male,

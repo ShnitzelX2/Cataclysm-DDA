@@ -5607,7 +5607,14 @@ float Character::get_hit_base() const
 
 std::string Character::get_name() const
 {
-    return play_name.value_or( name );
+    std::string existing_name = play_name.value_or( name );
+    if( !custom_profession.empty() ) {
+        return string_format( pgettext( "name + suffix", "%1$s, %2$s" ), existing_name, custom_profession );
+    } else if( play_name_suffix ) {
+        return string_format( pgettext( "name + suffix", "%1$s, %2$s" ), existing_name,
+                              play_name_suffix.value() );
+    }
+    return existing_name;
 }
 
 std::vector<std::string> Character::get_grammatical_genders() const

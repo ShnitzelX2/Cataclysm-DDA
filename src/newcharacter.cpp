@@ -459,6 +459,7 @@ void avatar::randomize( const bool random_scenario, bool play_now )
     }
 
     prof = get_scenario()->weighted_random_profession();
+    play_name_suffix = prof->gender_appropriate_name( male );
     init_age = rng( this->prof->age_lower, this->prof->age_upper );
     starting_city = std::nullopt;
     world_origin = std::nullopt;

@@ -1113,8 +1113,6 @@ class Character : public Creature, public visitable
 
         double recoil = MAX_RECOIL;
 
-        std::string custom_profession;
-
         /** Returns true if the player has quiet melee attacks */
         bool is_quiet() const;
 
@@ -2702,6 +2700,11 @@ class Character : public Creature, public visitable
         std::string name; // Pre-cataclysm name, invariable
         // In-game name which you give to npcs or whoever asks, variable
         std::optional<std::string> play_name;
+        // In-game name suffix, either a profession or npc class, variable
+        std::optional<std::string> play_name_suffix;
+        // In-game customized suffix, set by player OR temp professison for NPC
+        std::string custom_profession;
+
         bool male = false;
 
         std::vector<effect_on_condition_id> death_eocs;
