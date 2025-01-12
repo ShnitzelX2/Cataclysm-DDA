@@ -514,7 +514,7 @@ class pocket_data
         // items in this pocket pass their flags to the parent item
         bool inherits_flags = false;
         // max amount of electronic memory held
-        units::ememory ememory_max = 0_B;
+        units::ememory ememory_max = 0_KB;
         // the contents of the pocket are visible
         bool transparent = false;
 

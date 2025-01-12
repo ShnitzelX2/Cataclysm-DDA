@@ -1901,9 +1901,9 @@ std::vector<const item *> item_contents::ebooks() const
     return ebooks;
 }
 
-std::vector< item *> item_contents::efiles()
+std::vector<item *> item_contents::efiles()
 {
-    std::vector< item *> efiles;
+    std::vector<item *> efiles;
     for( item_pocket &pocket : contents ) {
         if( pocket.is_type( pocket_type::E_FILE_STORAGE ) ) {
             for( item *it : pocket.all_items_top() ) {
