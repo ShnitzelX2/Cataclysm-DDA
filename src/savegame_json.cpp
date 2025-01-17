@@ -3117,30 +3117,29 @@ void item::deserialize( const JsonObject &data )
     archive.allow_omitted_members();
     data.copy_visited_members( archive );
 
-    // first half of the if statement is for migration to nested containers. remove after 0.F
-    if( data.has_array( "contents" ) ) {
-        std::list<item> items;
-        data.read( "contents", items );
-        for( const item &it : items ) {
-            migrate_content_item( it );
-        }
-    } else if( data.has_object( "contents" ) ) { // non-empty contents
+    if( data.has_object( "contents" ) ) { // pockets
         item_contents read_contents;
         data.read( "contents", read_contents );
-
-        contents.read_mods( read_contents );
-        update_modified_pockets();
         contents.combine( read_contents, false, true, false, true );
 
-        if( data.has_object( "contents" ) ) {
-            JsonObject tested = data.get_object( "contents" );
-            tested.allow_omitted_members();
-            if( tested.has_array( "items" ) ) {
-                // migration for nested containers. leave until after 0.F
-                std::list<item> items;
-                tested.read( "items", items );
-                for( const item &it : items ) {
-                    migrate_content_item( it );
+        auto pockets_e_legacy = []( item_pocket const & pocket ) {
+            return pocket.is_type( pocket_type::EBOOK ) || pocket.is_type( pocket_type::SOFTWARE );
+        };
+        auto pockets_new_efile = []( item_pocket const & pocket ) {
+            return pocket.is_type( pocket_type::E_FILE_STORAGE );
+        };
+        std::vector<item_pocket *> pockets = contents.get_pockets( pockets_new_efile );
+        item_pocket *new_efile_storage = !pockets.empty() ? pockets.front() : nullptr;
+
+        for( item_pocket *pocket : contents.get_pockets( pockets_e_legacy ) ) {
+            for( const item *it : pocket->all_items_top() ) {
+                if( new_efile_storage == nullptr ) {
+                    debugmsg( "efile storage pocket needed for item: %s", tname() );
+                } else {
+                    std::optional<item> removed_item = pocket->remove_item( *it );
+                    if( removed_item ) {
+                        new_efile_storage->add( *removed_item );
+                    }
                 }
             }
         }
