@@ -121,27 +121,6 @@
   },
   {
     "type": "GENERIC",
-    "id": "file",
-    "name": { "str": "file" },
-    "category": "books",
-    "description": "Several documents containing all kinds of information, customer data, and charts, kept together in a manila folder.  Pretty useless now.",
-    "weight": "15 g",
-    "color": "white",
-    "symbol": ",",
-    "material": [ "paper" ],
-    "volume": "50 ml",
-    "flags": [ "TRADER_AVOID", "TINDER" ]
-  },
-  {
-    "type": "GENERIC",
-    "id": "log_immersion27",
-    "copy-from": "file",
-    "name": { "str": "INCIDENT REPORT: IMMERSION-27A" },
-    "description": "A white piece of paper, with the logo of XEDRA printed on its upper left corner.  It seems to be an internal report of some kind.",
-    "snippet_category": "log_immersion27"
-  },
-  {
-    "type": "GENERIC",
     "id": "report_t_substrate",
     "copy-from": "log_immersion27",
     "name": { "str_sp": "MATERIAL: T-SUBSTRATE" },

@@ -893,7 +893,7 @@ These flags can be applied via JSON item definition to most items.  Not to be co
 - ```TOBACCO``` This item is a lit cigar or cigarette, and gives smoking effect when you wear it.
 - ```TOURNIQUET``` This item is tourniquet, it temporarily reduces bleed intensity and increases your effective compression limit.
 - ```TOW_CABLE``` This item is a tow cable, and allow towing the vehicle.
-- ```TRADER_AVOID``` NPCs will not start with this item.  Use this for active items (e.g. flashlight (on)), dangerous items (e.g. active bomb), fake items or unusual items (e.g. unique quest item).
+- ```TRADER_AVOID``` NPCs will not start with this item, nor will NPCs ever buy this item.  Use this for active items (e.g. flashlight (on)), dangerous items (e.g. active bomb), fake items or unusual items (e.g. unique quest item).
 - ```TRADER_KEEP_EQUIPPED``` NPCs will only trade this item if they aren't currently wearing or wielding it.
 - ```TRADER_KEEP``` NPCs will not trade this item away under any circumstances.
 - ```TWO_WAY_RADIO``` this items is two-way radio, and work accordingly.

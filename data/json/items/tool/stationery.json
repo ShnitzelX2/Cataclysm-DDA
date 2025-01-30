@@ -250,7 +250,7 @@
         "max_contains_volume": "2500 ml",
         "max_item_length": "300 mm",
         "moves": 150,
-        "flag_restriction": [ "PAPER_SHAPED" ]
+        "flag_restriction": [ "PAPER_SHAPED", "BANK_NOTE_SHAPED" ]
       }
     ]
   }
