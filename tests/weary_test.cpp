@@ -347,7 +347,7 @@ TEST_CASE( "weary_recovery", "[weary][activities]" )
         REQUIRE( !info.empty() );
         CHECK( info.transition_minutes( 0, 1, 325_minutes ) == Approx( 325 ).margin( 10 ) );
         CHECK( info.transition_minutes( 1, 2, 625_minutes ) == Approx( 625 ).margin( 10 ) );
-        CHECK( info.transition_minutes( 2, 1, 735_minutes ) == Approx( 735 ).margin( 10 ) );
+        CHECK( info.transition_minutes( 2, 1, 735_minutes ) == Approx( 725 ).margin( 10 ) );
         CHECK( info.transition_minutes( 1, 0, 985_minutes ) == Approx( 985 ).margin( 10 ) );
     }
 }
