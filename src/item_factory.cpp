@@ -2846,6 +2846,11 @@ void itype::load_slots( const JsonObject &jo, bool was_loaded )
 
     std::vector<std::string> subtypes;
     optional( jo, was_loaded, "subtypes", subtypes );
+    if( std::find( subtypes.begin(), subtypes.end(), "PET_ARMOR" ) != subtypes.end() &&
+        std::find( subtypes.begin(), subtypes.end(), "ARMOR" ) != subtypes.end() ) {
+        debugmsg( "PET_ARMOR and ARMOR cannot be simultaneously defined" );
+    }
+
     for( const std::string &subtype : subtypes ) {
         subtype_to_slot( subtype );
     }
