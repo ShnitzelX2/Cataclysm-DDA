@@ -81,10 +81,6 @@ struct city_settings {
     void finalize();
 };
 
-struct ter_furn_id {
-    ter_id ter;
-    furn_id furn;
-    ter_furn_id();
 };
 
 /*
