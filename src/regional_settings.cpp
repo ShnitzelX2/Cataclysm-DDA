@@ -949,7 +949,7 @@ void load_region_settings( const JsonObject &jo )
         jo.throw_error( "\"weather\": { … } required for default" );
     } else {
         JsonObject wjo = jo.get_object( "weather" );
-        new_region.weather.load( wjo, false );
+        new_region.weather.load( wjo, "dda" );
     }
 
     load_overmap_feature_flag_settings( jo, new_region.overmap_feature_flag, strict, false );
@@ -1028,6 +1028,30 @@ void region_settings::finalize_all()
     if( !region_settings_id( "default" ).is_valid() ) {
         debugmsg( "id: `default` region settings were not loaded or failed to load" );
     }
+}
+
+region_settings &region_settings::operator+=( const region_settings &rhs )
+{
+    if( rhs.city_spec.is_valid() ) {
+        const_cast<region_settings_city &>( *city_spec ) += *rhs.city_spec;
+    }
+    if( rhs.overmap_highway.is_valid() ) {
+        const_cast<region_settings_highway &>( *overmap_highway ) += *rhs.overmap_highway;
+    }
+    if( rhs.forest_trail.is_valid() ) {
+        const_cast<region_settings_forest_trail &>( *forest_trail ) += *rhs.forest_trail;
+    }
+    if( rhs.region_extras.is_valid() ) {
+        const_cast<region_settings_map_extras &>( *region_extras ) += *rhs.region_extras;
+    }
+    if( rhs.region_terrain_and_furniture.is_valid() ) {
+        const_cast<region_settings_terrain_furniture &>( *region_terrain_and_furniture ) +=
+            *rhs.region_terrain_and_furniture;
+    }
+    if( rhs.forest_composition.is_valid() ) {
+        const_cast<region_settings_forest_mapgen &>( *forest_composition ) += *rhs.forest_composition;
+    }
+    return *this;
 }
 
 void region_overlay_new::finalize()
@@ -1350,6 +1374,27 @@ ter_furn_id forest_biome::pick() const
     return *result;
 }
 
+ter_furn_id forest_biome_mapgen::pick() const
+{
+    // Iterate through the biome components (which have already been put into sequence), roll for the
+    // one_in chance that component contributes a feature, and if so pick that feature and return it.
+    // If a given component does not roll as success, proceed to the next feature in sequence until
+    // a feature is picked or none are picked, in which case an empty feature is returned.
+    const ter_furn_id *result = nullptr;
+    for( const forest_biome_feature_id &pr : biome_components ) {
+        if( one_in( pr->chance ) ) {
+            result = pr->types.pick();
+            break;
+        }
+    }
+
+    if( result == nullptr ) {
+        return ter_furn_id();
+    }
+
+    return *result;
+}
+
 void forest_biome::finalize()
 {
     for( auto &pr : unfinalized_biome_components ) {
@@ -1522,6 +1567,22 @@ map_extras map_extras::filtered_by( const mapgendata &dat ) const
     return result;
 }
 
+map_extra_collection map_extra_collection::filtered_by( const mapgendata &dat ) const
+{
+    map_extra_collection result( chance );
+    for( const std::pair<map_extra_id, int> &obj : values ) {
+        const map_extra_id &extra_id = obj.first;
+        if( extra_id->is_valid_for( dat ) ) {
+            result.values.add( extra_id, obj.second );
+        }
+    }
+    if( !values.empty() && result.values.empty() ) {
+        // OMT is too tall / too deep for all map extras. Skip map extra generation.
+        result.chance = 0;
+    }
+    return result;
+}
+
 void region_terrain_and_furniture_settings::finalize()
 {
     for( auto const &template_pr : unfinalized_terrain ) {
@@ -1579,6 +1640,42 @@ furn_id region_terrain_and_furniture_settings::resolve( const furn_id &fid ) con
     while( region_list != furniture.end() ) {
         result = *region_list->second.pick();
         region_list = furniture.find( result );
+    }
+    return result;
+}
+
+ter_id region_settings_terrain_furniture::resolve( const ter_id &tid ) const
+{
+    if( tid.id().is_null() ) {
+        return tid;
+    }
+    ter_id result = tid;
+    auto predicate = [&result]( const region_terrain_furniture_id & tid_r ) {
+        return tid_r->replaced_ter_id == result;
+    };
+    auto found_tfid = std::find_if( ter_furn.begin(), ter_furn.end(), predicate );
+    while( found_tfid != ter_furn.end() ) {
+        const region_terrain_furniture_id &rtf_id = *found_tfid;
+        result = *rtf_id->terrain.pick();
+        found_tfid = std::find_if( ter_furn.begin(), ter_furn.end(), predicate );
+    }
+    return result;
+}
+
+furn_id region_settings_terrain_furniture::resolve( const furn_id &fid ) const
+{
+    if( fid.id().is_null() ) {
+        return fid;
+    }
+    furn_id result = fid;
+    auto predicate = [&result]( const region_terrain_furniture_id & fid_r ) {
+        return fid_r->replaced_furn_id == result;
+    };
+    auto found_tfid = std::find_if( ter_furn.begin(), ter_furn.end(), predicate );
+    while( found_tfid != ter_furn.end() ) {
+        const region_terrain_furniture_id &rtf_id = *found_tfid;
+        result = *rtf_id->furniture.pick();
+        found_tfid = std::find_if( ter_furn.begin(), ter_furn.end(), predicate );
     }
     return result;
 }

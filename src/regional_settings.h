@@ -22,11 +22,12 @@
 class JsonObject;
 class mapgendata;
 
+const region_settings_id DEFAULT_REGION( "default" );
+
 class building_bin
 {
     private:
         bool finalized = false;
-        weighted_int_list<overmap_special_id> buildings;
         std::map<overmap_special_id, int> unfinalized_buildings;
     public:
         building_bin() = default;
@@ -38,7 +39,36 @@ class building_bin
         weighted_int_list<overmap_special_id> get_all_buildings() const {
             return buildings;
         }
+        void deserialize( const JsonValue &jv ) {
+            buildings.deserialize( jv );
+        }
+        weighted_int_list<overmap_special_id> buildings;
+        building_bin &operator+=( const building_bin &rhs ) {
+            for( const std::pair< overmap_special_id, int> &pr : rhs.buildings ) {
+                buildings.try_add( pr );
+            }
+            return *this;
+        }
 };
+
+/**
+* Applies the object to a string_id set by combining it with an already-existing string_id's object
+* or by emplacing it in the set if it doesn't exist.
+*/
+template<typename T>
+void apply_region_overlay( std::set<string_id<T>> collections,
+                           const string_id<T> &overlay_obj )
+{
+    string_id<T> overlay( overlay_obj->overlay_id );
+    auto find_collection = std::find( collections.begin(), collections.end(), overlay );
+    //if there's a valid overlay ID, combine the objects
+    if( overlay != string_id<T>::NULL_ID() &&
+        find_collection != collections.end() ) {
+        const_cast<T &>( find_collection->obj() ) += *overlay_obj;
+    } else { //just add like copy-from
+        collections.emplace( overlay_obj );
+    }
+}
 
 struct city_settings {
     // About the average US city non-residential, non-park land usage
