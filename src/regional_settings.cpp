@@ -27,6 +27,365 @@ const weighted_string_id_reader<overmap_special_id, int> building_bin_reader( 1 
 const weighted_string_id_reader<furn_id, int> furn_reader( 1 );
 const weighted_string_id_reader<ter_id, int> ter_reader( 1 );
 
+/** SETTING FACTORY */
+namespace
+{
+generic_factory<region_settings_river> region_settings_river_factory( "region_settings_river" );
+generic_factory<region_settings_lake> region_settings_lake_factory( "region_settings_lake" );
+generic_factory<region_settings_ocean> region_settings_ocean_factory( "region_settings_ocean" );
+generic_factory<region_settings_ravine> region_settings_ravine_factory( "region_settings_ravine" );
+generic_factory<region_settings_forest> region_settings_forest_factory( "region_settings_forest" );
+generic_factory<region_settings_highway>
+region_settings_highway_factory( "region_settings_highway" );
+generic_factory<region_settings_forest_trail>
+region_settings_forest_trail_factory( "region_settings_forest_trail" );
+generic_factory<region_settings_forest_mapgen>
+region_settings_forest_mapgen_factory( "region_settings_forest_mapgen" );
+generic_factory<forest_biome_mapgen> forest_biome_mapgen_factory( "forest_biome_mapgen" );
+generic_factory<region_settings_city> region_settings_city_factory( "region_settings_city" );
+generic_factory<map_extra_collection> map_extra_collection_factory( "map_extra_collection" );
+generic_factory<region_settings_map_extras>
+region_settings_map_extras_factory( "region_settings_map_extras" );
+generic_factory<region_settings> region_settings_factory( "region_settings_new" );
+generic_factory<region_settings_terrain_furniture>
+region_settings_terrain_furniture_factory( "region_settings_terrain_furniture" );
+generic_factory<region_terrain_furniture>
+region_terrain_furniture_factory( "region_terrain_furniture" );
+generic_factory<forest_biome_feature> forest_biome_feature_factory( "forest_biome_feature" );
+generic_factory<region_overlay_new> region_overlay_factory( "region_overlay_new" );
+} // namespace
+
+/** OBJ */
+template<>
+const region_settings_river &string_id<region_settings_river>::obj() const
+{
+    return region_settings_river_factory.obj( *this );
+}
+template<>
+const region_settings_lake &string_id<region_settings_lake>::obj() const
+{
+    return region_settings_lake_factory.obj( *this );
+}
+template<>
+const region_settings_ocean &string_id<region_settings_ocean>::obj() const
+{
+    return region_settings_ocean_factory.obj( *this );
+}
+template<>
+const region_settings_ravine &string_id<region_settings_ravine>::obj() const
+{
+    return region_settings_ravine_factory.obj( *this );
+}
+template<>
+const region_settings_forest &string_id<region_settings_forest>::obj() const
+{
+    return region_settings_forest_factory.obj( *this );
+}
+template<>
+const region_settings_highway &string_id<region_settings_highway>::obj() const
+{
+    return region_settings_highway_factory.obj( *this );
+}
+template<>
+const region_settings_forest_trail &string_id<region_settings_forest_trail>::obj() const
+{
+    return region_settings_forest_trail_factory.obj( *this );
+}
+template<>
+const region_settings_forest_mapgen &string_id<region_settings_forest_mapgen>::obj() const
+{
+    return region_settings_forest_mapgen_factory.obj( *this );
+}
+template<>
+const forest_biome_mapgen &string_id<forest_biome_mapgen>::obj() const
+{
+    return forest_biome_mapgen_factory.obj( *this );
+}
+template<>
+const region_settings_city &string_id<region_settings_city>::obj() const
+{
+    return region_settings_city_factory.obj( *this );
+}
+template<>
+const map_extra_collection &string_id<map_extra_collection>::obj() const
+{
+    return map_extra_collection_factory.obj( *this );
+}
+template<>
+const region_settings_map_extras &string_id<region_settings_map_extras>::obj() const
+{
+    return region_settings_map_extras_factory.obj( *this );
+}
+template<>
+const region_settings &string_id<region_settings>::obj() const
+{
+    return region_settings_factory.obj( *this );
+}
+template<>
+const region_settings_terrain_furniture &string_id<region_settings_terrain_furniture>::obj() const
+{
+    return region_settings_terrain_furniture_factory.obj( *this );
+}
+template<>
+const region_terrain_furniture &string_id<region_terrain_furniture>::obj() const
+{
+    return region_terrain_furniture_factory.obj( *this );
+}
+template<>
+const forest_biome_feature &string_id<forest_biome_feature>::obj() const
+{
+    return forest_biome_feature_factory.obj( *this );
+}
+template<>
+const region_overlay_new &string_id<region_overlay_new>::obj() const
+{
+    return region_overlay_factory.obj( *this );
+}
+
+/** IS_VALID */
+template<>
+bool string_id<region_settings_river>::is_valid() const
+{
+    return region_settings_river_factory.is_valid( *this );
+}
+template<>
+bool string_id<region_settings_lake>::is_valid() const
+{
+    return region_settings_lake_factory.is_valid( *this );
+}
+template<>
+bool string_id<region_settings_ocean>::is_valid() const
+{
+    return region_settings_ocean_factory.is_valid( *this );
+}
+template<>
+bool string_id<region_settings_ravine>::is_valid() const
+{
+    return region_settings_ravine_factory.is_valid( *this );
+}
+template<>
+bool string_id<region_settings_forest>::is_valid() const
+{
+    return region_settings_forest_factory.is_valid( *this );
+}
+template<>
+bool string_id<region_settings_highway>::is_valid() const
+{
+    return region_settings_highway_factory.is_valid( *this );
+}
+template<>
+bool string_id<region_settings_forest_trail>::is_valid() const
+{
+    return region_settings_forest_trail_factory.is_valid( *this );
+}
+template<>
+bool string_id<region_settings_forest_mapgen>::is_valid() const
+{
+    return region_settings_forest_mapgen_factory.is_valid( *this );
+}
+template<>
+bool string_id<forest_biome_mapgen>::is_valid() const
+{
+    return forest_biome_mapgen_factory.is_valid( *this );
+}
+template<>
+bool string_id<region_settings_city>::is_valid() const
+{
+    return region_settings_city_factory.is_valid( *this );
+}
+template<>
+bool string_id<map_extra_collection>::is_valid() const
+{
+    return map_extra_collection_factory.is_valid( *this );
+}
+template<>
+bool string_id<region_settings_map_extras>::is_valid() const
+{
+    return region_settings_map_extras_factory.is_valid( *this );
+}
+template<>
+bool string_id<region_settings>::is_valid() const
+{
+    return region_settings_factory.is_valid( *this );
+}
+template<>
+bool string_id<region_settings_terrain_furniture>::is_valid() const
+{
+    return region_settings_terrain_furniture_factory.is_valid( *this );
+}
+template<>
+bool string_id<region_terrain_furniture>::is_valid() const
+{
+    return region_terrain_furniture_factory.is_valid( *this );
+}
+template<>
+bool string_id<forest_biome_feature>::is_valid() const
+{
+    return forest_biome_feature_factory.is_valid( *this );
+}
+template<>
+bool string_id<region_overlay_new>::is_valid() const
+{
+    return region_overlay_factory.is_valid( *this );
+}
+
+/** INIT LOAD */
+void region_settings_river::load_region_settings_river( const JsonObject &jo,
+        const std::string &src )
+{
+    region_settings_river_factory.load( jo, src );
+}
+void region_settings_lake::load_region_settings_lake( const JsonObject &jo, const std::string &src )
+{
+    region_settings_lake_factory.load( jo, src );
+}
+void region_settings_ocean::load_region_settings_ocean( const JsonObject &jo,
+        const std::string &src )
+{
+    region_settings_ocean_factory.load( jo, src );
+}
+void region_settings_ravine::load_region_settings_ravine( const JsonObject &jo,
+        const std::string &src )
+{
+    region_settings_ravine_factory.load( jo, src );
+}
+void region_settings_forest::load_region_settings_forest( const JsonObject &jo,
+        const std::string &src )
+{
+    region_settings_forest_factory.load( jo, src );
+}
+void region_settings_highway::load_region_settings_highway( const JsonObject &jo,
+        const std::string &src )
+{
+    region_settings_highway_factory.load( jo, src );
+}
+void region_settings_forest_trail::load_region_settings_forest_trail( const JsonObject &jo,
+        const std::string &src )
+{
+    region_settings_forest_trail_factory.load( jo, src );
+}
+void region_settings_forest_mapgen::load_region_settings_forest_mapgen( const JsonObject &jo,
+        const std::string &src )
+{
+    region_settings_forest_mapgen_factory.load( jo, src );
+}
+void forest_biome_mapgen::load_forest_biome_mapgen( const JsonObject &jo,
+        const std::string &src )
+{
+    forest_biome_mapgen_factory.load( jo, src );
+}
+void region_settings_city::load_region_settings_city( const JsonObject &jo,
+        const std::string &src )
+{
+    region_settings_city_factory.load( jo, src );
+}
+void map_extra_collection::load_map_extra_collection( const JsonObject &jo,
+        const std::string &src )
+{
+    map_extra_collection_factory.load( jo, src );
+}
+void region_settings_map_extras::load_region_settings_map_extras( const JsonObject &jo,
+        const std::string &src )
+{
+    region_settings_map_extras_factory.load( jo, src );
+}
+void region_settings::load_region_settings( const JsonObject &jo,
+        const std::string &src )
+{
+    region_settings_factory.load( jo, src );
+}
+void region_settings_terrain_furniture::load_region_settings_terrain_furniture(
+    const JsonObject &jo,
+    const std::string &src )
+{
+    region_settings_terrain_furniture_factory.load( jo, src );
+}
+void region_terrain_furniture::load_region_terrain_furniture( const JsonObject &jo,
+        const std::string &src )
+{
+    region_terrain_furniture_factory.load( jo, src );
+}
+void forest_biome_feature::load_forest_biome_feature( const JsonObject &jo,
+        const std::string &src )
+{
+    forest_biome_feature_factory.load( jo, src );
+}
+void region_overlay_new::load_region_overlay_new( const JsonObject &jo,
+        const std::string &src )
+{
+    region_overlay_factory.load( jo, src );
+}
+
+/** UNLOAD (RESET) */
+void region_settings_river::reset()
+{
+    region_settings_river_factory.reset();
+}
+void region_settings_lake::reset()
+{
+    region_settings_lake_factory.reset();
+}
+void region_settings_ocean::reset()
+{
+    region_settings_ocean_factory.reset();
+}
+void region_settings_ravine::reset()
+{
+    region_settings_ravine_factory.reset();
+}
+void region_settings_forest::reset()
+{
+    region_settings_forest_factory.reset();
+}
+void region_settings_highway::reset()
+{
+    region_settings_highway_factory.reset();
+}
+void region_settings_forest_trail::reset()
+{
+    region_settings_forest_trail_factory.reset();
+}
+void region_settings_forest_mapgen::reset()
+{
+    region_settings_forest_mapgen_factory.reset();
+}
+void forest_biome_mapgen::reset()
+{
+    forest_biome_mapgen_factory.reset();
+}
+void region_settings_city::reset()
+{
+    region_settings_city_factory.reset();
+}
+void map_extra_collection::reset()
+{
+    map_extra_collection_factory.reset();
+}
+void region_settings_map_extras::reset()
+{
+    region_settings_map_extras_factory.reset();
+}
+void region_settings::reset()
+{
+    region_settings_factory.reset();
+}
+void region_settings_terrain_furniture::reset()
+{
+    region_settings_terrain_furniture_factory.reset();
+}
+void region_terrain_furniture::reset()
+{
+    region_terrain_furniture_factory.reset();
+}
+void forest_biome_feature::reset()
+{
+    forest_biome_feature_factory.reset();
+}
+void region_overlay_new::reset()
+{
+    region_overlay_factory.reset();
+}
+
 template<typename T>
 void read_and_set_or_throw( const JsonObject &jo, const std::string &member, T &target,
                             bool required )
