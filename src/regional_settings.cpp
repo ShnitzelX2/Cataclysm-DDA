@@ -13,6 +13,7 @@
 #include "enum_conversions.h"
 #include "flexbuffer_json.h"
 #include "generic_factory.h"
+#include "mapdata.h"
 #include "map_extras.h"
 #include "options.h"
 #include "output.h"
@@ -22,8 +23,6 @@
 
 class mapgendata;
 
-ter_furn_id::ter_furn_id() : ter( ter_str_id::NULL_ID().id() ),
-    furn( furn_str_id::NULL_ID().id() ) { }
 
 template<typename T>
 void read_and_set_or_throw( const JsonObject &jo, const std::string &member, T &target,
