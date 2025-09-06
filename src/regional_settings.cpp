@@ -996,6 +996,58 @@ void region_settings::load( const JsonObject &jo, std::string_view )
     optional( jo, was_loaded, "connections", overmap_connection );
     optional( jo, was_loaded, "terrain_furniture", region_terrain_and_furniture );
 }
+
+void region_settings::finalize()
+{
+    // So the data definition goes from z = OVERMAP_HEIGHT to z = OVERMAP_DEPTH
+    std::reverse( default_oter.begin(), default_oter.end() );
+}
+
+void region_settings::finalize_all()
+{
+    forest_biome_feature_factory.finalize();
+
+    forest_biome_mapgen_factory.finalize();
+    region_terrain_furniture_factory.finalize();
+    map_extra_collection_factory.finalize();
+
+    region_settings_river_factory.finalize();
+    region_settings_lake_factory.finalize();
+    region_settings_ocean_factory.finalize();
+    region_settings_ravine_factory.finalize();
+    region_settings_forest_factory.finalize();
+    region_settings_highway_factory.finalize();
+    region_settings_forest_trail_factory.finalize();
+    region_settings_forest_mapgen_factory.finalize();
+    region_settings_city_factory.finalize();
+    region_settings_map_extras_factory.finalize();
+    region_settings_terrain_furniture_factory.finalize();
+
+    region_settings_factory.finalize();
+
+    if( !region_settings_id( "default" ).is_valid() ) {
+        debugmsg( "id: `default` region settings were not loaded or failed to load" );
+    }
+}
+
+void region_overlay_new::finalize()
+{
+    for( region_settings &region : region_settings_factory.get_all_mod() ) {
+        for( const std::string &tag : apply_to_tags ) {
+            if( apply_to_tags.count( "all" ) > 0 ||
+                std::find( region.tags.begin(), region.tags.end(), tag ) != region.tags.end() ) {
+                region += overlay;
+                break;
+            }
+        }
+    }
+}
+
+void region_overlay_new::finalize_all()
+{
+    region_overlay_factory.finalize();
+}
+
 void check_region_settings()
 {
     for( const std::pair<const std::string, regional_settings> &p : region_settings_map ) {
@@ -1325,12 +1377,28 @@ void forest_biome::finalize()
     }
 }
 
+void forest_biome_mapgen::finalize()
+{
+    for( auto &pr : terrain_dependent_furniture ) {
+        pr.second.finalize();
+    }
+}
+
 void forest_mapgen_settings::finalize()
 {
     for( auto &pr : unfinalized_biomes ) {
         pr.second.finalize();
         const oter_type_id ot( pr.first );
         biomes[ot] = pr.second;
+    }
+}
+
+void region_settings_forest_mapgen::finalize()
+{
+    for( const forest_biome_mapgen_id &biome_id : biomes ) {
+        for( const oter_type_id &ott_id : biome_id->terrains ) {
+            oter_to_biomes[ott_id] = biome_id;
+        }
     }
 }
 
@@ -1361,6 +1429,27 @@ void overmap_lake_settings::finalize()
     }
 }
 
+void region_settings_forest_trail::finalize()
+{
+    trailheads.finalize();
+}
+
+void region_settings_city::finalize()
+{
+    houses.finalize();
+    shops.finalize();
+    parks.finalize();
+}
+
+//these could be defined in the future
+void forest_biome_feature::finalize() {}
+void forest_biome_terrain_dependent_furniture_new::finalize() {}
+void region_settings_river::finalize() {}
+void region_settings_lake::finalize() {}
+void region_settings_ocean::finalize() {}
+void region_settings_forest::finalize() {}
+void region_settings_ravine::finalize() {}
+
 void overmap_highway_settings::finalize()
 {
     //finds longest special in a building collection
@@ -1388,6 +1477,33 @@ void overmap_highway_settings::finalize()
                                          counterclockwise_slant->longest_side() );
         HIGHWAY_MAX_DEVIANCE = ( longest_bend_length + 1 ) * 2;
     }
+}
+
+void region_settings_highway::finalize()
+{
+    //finds longest special in a building collection
+    auto find_longest_special = []( const building_bin & b ) {
+        int longest_length = 0;
+        for( const auto &weighted_pair : b.get_all_buildings() ) {
+            const overmap_special_id &special = weighted_pair.first;
+            int spec_length = special.obj().longest_side();
+            if( spec_length > longest_length ) {
+                longest_length = spec_length;
+            }
+        }
+        return longest_length;
+    };
+
+    four_way_intersections.finalize();
+    three_way_intersections.finalize();
+    bends.finalize();
+    road_connections.finalize();
+    interchanges.finalize();
+
+    longest_bend_length = find_longest_special( bends );
+    longest_slant_length = std::max( clockwise_slant->longest_side(),
+                                     counterclockwise_slant->longest_side() );
+    HIGHWAY_MAX_DEVIANCE = ( longest_bend_length + 1 ) * 2;
 }
 
 map_extras map_extras::filtered_by( const mapgendata &dat ) const
