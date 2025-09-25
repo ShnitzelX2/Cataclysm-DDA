@@ -4,6 +4,7 @@
 
 #include <array>
 #include <cstddef>
+#include <set>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
@@ -29,7 +30,7 @@ class map;
 class mission;
 enum class direction : unsigned int;
 enum class mapgen_phase;
-struct regional_settings;
+struct region_settings;
 
 namespace om_direction
 {
@@ -141,7 +142,7 @@ class mapgendata
 
         std::unordered_map<cube_direction, std::string> joins;
 
-        const regional_settings &region;
+        const region_settings &region;
 
         map &m;
 
