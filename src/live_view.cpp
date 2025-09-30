@@ -56,7 +56,8 @@ void live_view::show( const tripoint &p )
             int line_out = START_LINE;
             // HACK: using dummy window to get the window height without refreshing.
             win = catacurses::newwin( 1, width, point::zero );
-            g->pre_print_all_tile_info( tripoint_bub_ms( mouse_position ), win, line_out, line_limit, cache );
+            game_ui::pre_print_all_tile_info( tripoint_bub_ms( mouse_position ), win, line_out, line_limit,
+                                              cache );
             const int live_view_box_height = std::min( max_height, std::max( line_out + 2, MIN_BOX_HEIGHT ) );
 
             win = catacurses::newwin( live_view_box_height, width,
@@ -67,8 +68,9 @@ void live_view::show( const tripoint &p )
             werase( win );
             const visibility_variables &cache = here.get_visibility_variables_cache();
             int line_out = START_LINE;
-            g->pre_print_all_tile_info( tripoint_bub_ms( mouse_position ), win, line_out, getmaxy( win ) - 2,
-                                        cache );
+            game_ui::pre_print_all_tile_info( tripoint_bub_ms( mouse_position ), win, line_out,
+                                              getmaxy( win ) - 2,
+                                              cache );
             draw_border( win );
             center_print( win, 0, c_white, _( "< <color_green>Mouse view</color> >" ) );
             wnoutrefresh( win );

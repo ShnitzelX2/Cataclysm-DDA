@@ -6837,7 +6837,7 @@ look_around_result game::look_around(
 
             int first_line = 1;
             const int last_line = getmaxy( w_info ) - 4;
-            pre_print_all_tile_info( lp, w_info, first_line, last_line, cache );
+            game_ui::pre_print_all_tile_info( lp, w_info, first_line, last_line, cache );
 
             wnoutrefresh( w_info );
         } );
