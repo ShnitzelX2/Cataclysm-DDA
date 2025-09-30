@@ -66,9 +66,6 @@ static const trap_str_id tr_funnel( "tr_funnel" );
 static const trap_str_id tr_landmine( "tr_landmine" );
 static const trap_str_id tr_rollmat( "tr_rollmat" );
 
-// NOLINTNEXTLINE(cata-static-declarations)
-extern const int savegame_version;
-
 static const point_sm_ms &corner_ne = point_sm_ms::zero;
 static const point_sm_ms corner_nw( SEEX - 1, 0 );
 static const point_sm_ms corner_se( 0, SEEY - 1 );
