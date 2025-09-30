@@ -9,6 +9,7 @@
 #include "coordinates.h"
 #include "cursesdef.h"
 #include "game.h"
+#include "game_ui.h"
 #include "map.h"
 #include "options.h"
 #include "output.h"

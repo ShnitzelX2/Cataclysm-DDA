@@ -697,6 +697,8 @@ class game
             zones_manager_open = zm_open;
         };
 
+        //TODO: migrate with examine-related functions
+        std::string get_fire_fuel_string( const tripoint_bub_ms &examp );
         /// @brief attempt to find a safe route (avoids tiles dangerous to '@ref who').
         /// @param who character to use for evaluating danger tiles and pathfinding start position
         /// @param target pathfinding destination tile
@@ -728,15 +730,6 @@ class game
                                         bool is_moving_zone = false, const tripoint_bub_ms &end_point = tripoint_bub_ms::zero,
                                         bool change_lv = true );
         look_around_result look_around( look_around_params );
-
-        // Shared method to print "look around" info
-        void pre_print_all_tile_info( const tripoint_bub_ms &lp, const catacurses::window &w_info,
-                                      int &line, int last_line, const visibility_variables &cache );
-
-        // Shared method to print "look around" info
-        void print_all_tile_info( const tripoint_bub_ms &lp, const catacurses::window &w_look,
-                                  const std::string &area_name, int column,
-                                  int &line, int last_line, const visibility_variables &cache );
 
         void draw_look_around_cursor( const tripoint_bub_ms &lp, const visibility_variables &cache );
 
@@ -1013,33 +1006,6 @@ class game
     private:
 
         void chat(); // Talk to a nearby NPC  'C'
-
-        // Internal methods to show "look around" info
-        void print_fields_info( const tripoint_bub_ms &lp, const catacurses::window &w_look, int column,
-                                int &line );
-        void print_terrain_info( const tripoint_bub_ms &lp, const catacurses::window &w_look,
-                                 const std::string &area_name, int column,
-                                 int &line );
-        void print_furniture_info( const tripoint_bub_ms &lp, const catacurses::window &w_look, int column,
-                                   int &line );
-        void print_trap_info( const tripoint_bub_ms &lp, const catacurses::window &w_look, int column,
-                              int &line );
-        void print_part_con_info( const tripoint_bub_ms &lp, const catacurses::window &w_look, int column,
-                                  int &line );
-        void print_creature_info( const Creature *creature, const catacurses::window &w_look, int column,
-                                  int &line, int last_line );
-        void print_vehicle_info( const vehicle *veh, int veh_part, const catacurses::window &w_look,
-                                 int column, int &line, int last_line );
-        void print_visibility_info( const catacurses::window &w_look, int column, int &line,
-                                    visibility_type visibility );
-        void print_items_info( const tripoint_bub_ms &lp, const catacurses::window &w_look, int column,
-                               int &line,
-                               int last_line );
-        void print_graffiti_info( const tripoint_bub_ms &lp, const catacurses::window &w_look, int column,
-                                  int &line, int last_line );
-
-        void print_debug_info( const tripoint_bub_ms &lp, const catacurses::window &w_look,
-                               int column, int &line );
 
         input_context get_player_input( std::string &action );
 
