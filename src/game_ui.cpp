@@ -69,6 +69,7 @@ void game_ui::print_all_tile_info( const tripoint_bub_ms &lp, const catacurses::
                                    const visibility_variables &cache )
 {
     map &here = get_map();
+    const avatar &u = get_avatar();
 
     visibility_type visibility = visibility_type::HIDDEN;
     const bool inbounds = here.inbounds( lp );
@@ -182,6 +183,7 @@ void game_ui::print_terrain_info( const tripoint_bub_ms &lp, const catacurses::w
                                   const std::string &area_name, int column, int &line )
 {
     map &here = get_map();
+    const avatar &u = get_avatar();
 
     const int max_width = getmaxx( w_look ) - column - 1;
 
@@ -350,6 +352,7 @@ void game_ui::print_trap_info( const tripoint_bub_ms &lp, const catacurses::wind
                                int &line )
 {
     map &here = get_map();
+    const avatar &u = get_avatar();
 
     const trap &tr = here.tr_at( lp );
     if( tr.can_see( lp, u ) ) {
@@ -384,6 +387,7 @@ void game_ui::print_creature_info( const Creature *creature, const catacurses::w
                                    const int column, int &line, const int last_line )
 {
     const map &here = get_map();
+    const avatar &u = get_avatar();
 
     int vLines = last_line - line;
     if( creature != nullptr && ( u.sees( here, *creature ) || creature == &u ) ) {
@@ -412,6 +416,7 @@ void game_ui::print_items_info( const tripoint_bub_ms &lp, const catacurses::win
                                 const int last_line )
 {
     map &here = get_map();
+    const avatar &u = get_avatar();
 
     if( !here.sees_some_items( lp, u ) ) {
         return;
