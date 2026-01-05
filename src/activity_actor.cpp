@@ -114,6 +114,7 @@
 #include "veh_type.h"
 #include "veh_utils.h"
 #include "vehicle.h"
+#include "vehicle_selector.h"
 #include "vpart_position.h"
 #include "vpart_range.h"
 
@@ -186,6 +187,7 @@ static const activity_id ACT_QUARTER( "ACT_QUARTER" );
 static const activity_id ACT_READ( "ACT_READ" );
 static const activity_id ACT_REEL_CABLE( "ACT_REEL_CABLE" );
 static const activity_id ACT_RELOAD( "ACT_RELOAD" );
+static const activity_id ACT_ROBOT_CONTROL( "ACT_ROBOT_CONTROL" );
 static const activity_id ACT_SHAVE( "ACT_SHAVE" );
 static const activity_id ACT_SHEARING( "ACT_SHEARING" );
 static const activity_id ACT_SKIN( "ACT_SKIN" );
@@ -2455,8 +2457,8 @@ std::string read_activity_actor::get_progress_message( const player_activity & )
         you.get_skill_level_object( skill ).can_train() &&
         you.has_identified( book->typeId() ) ) {
         const SkillLevel &skill_level = you.get_skill_level_object( skill );
-        //~ skill_name current_skill_level -> next_skill_level (% to next level)
-        return string_format( pgettext( "reading progress", "%1$s %2$d -> %3$d (%4$d%%)" ),
+        //~ skill_name current_skill_level  (% of next level) -> next_skill_level
+        return string_format( pgettext( "reading progress", "%1$s %2$d (%4$d%%) -> %3$d" ),
                               skill.obj().name(),
                               skill_level.knowledgeLevel(),
                               skill_level.knowledgeLevel() + 1,
@@ -5531,6 +5533,111 @@ std::unique_ptr<activity_actor> disable_activity_actor::deserialize( JsonValue &
     data.read( "target", actor.target );
     data.read( "reprogram", actor.reprogram );
     data.read( "moves_total", actor.moves_total );
+
+    return actor.clone();
+}
+
+void robot_control_activity_actor::start( player_activity &act, Character & )
+{
+    act.moves_total = to_moves<int>( initial_moves );
+    act.moves_left = act.moves_total;
+}
+
+void robot_control_activity_actor::do_turn( player_activity &act, Character &who )
+{
+    if( !controlled_monster_temp_id ) {
+        debugmsg( "No monster assigned in ACT_ROBOT_CONTROL" );
+        act.set_to_null();
+        return;
+    }
+    const shared_ptr_fast<monster> z = get_creature_tracker().from_temporary_id(
+                                           *controlled_monster_temp_id );
+
+    if( !z || !iuse::robotcontrol_can_target( who, *z ) ) {
+        who.add_msg_if_player( _( "Target lost.  IFF override failed." ) );
+        act.set_to_null();
+        return;
+    }
+
+    // TODO: Add some kind of chance of getting the target's attention
+}
+
+void robot_control_activity_actor::finish( player_activity &act, Character &who )
+{
+    act.set_to_null();
+
+    if( !controlled_monster_temp_id ) {
+        debugmsg( "No monster assigned in ACT_ROBOT_CONTROL" );
+        return;
+    }
+
+    shared_ptr_fast<monster> z = get_creature_tracker().from_temporary_id(
+                                     *controlled_monster_temp_id );
+    controlled_monster_temp_id.reset();
+
+    if( !z || !iuse::robotcontrol_can_target( who, *z ) ) {
+        who.add_msg_if_player( _( "Target lost.  IFF override failed." ) );
+        return;
+    }
+
+    who.add_msg_if_player( _( "You unleash your override attack on the %s." ), z->name() );
+
+    /** @EFFECT_INT increases chance of successful robot reprogramming, vs difficulty */
+    /** @EFFECT_COMPUTER increases chance of successful robot reprogramming, vs difficulty */
+    const float computer_skill = who.get_skill_level( skill_computer );
+    const float randomized_skill = rng( 2, who.int_cur ) + computer_skill;
+    float success = computer_skill - 3 * z->type->get_total_difficulty() / randomized_skill;
+    if( z->has_flag( mon_flag_RIDEABLE_MECH ) ) {
+        success = randomized_skill - rng( 1, 11 );
+    }
+    // rideable mechs are not hostile, they have no AI, they do not resist control as much.
+    if( success >= 0 ) {
+        who.add_msg_if_player( _( "You successfully override the %s's IFF protocols!" ),
+                               z->name() );
+        z->friendly = -1;
+        if( z->has_flag( mon_flag_RIDEABLE_MECH ) ) {
+            z->add_effect( effect_pet, 1_turns, true );
+        }
+    } else if( success >= -2 ) {
+        //A near success
+        who.add_msg_if_player( _( "The %s short circuits as you attempt to reprogram it!" ), z->name() );
+        //damage it a little
+        z->apply_damage( &who, bodypart_id( "torso" ), rng( 1, 10 ) );
+        if( z->is_dead() ) {
+            who.practice( skill_computer, 10 );
+            // Do not do the other effects if the robot died
+            return;
+        }
+        if( one_in( 3 ) ) {
+            who.add_msg_if_player( _( "…and turns friendly!" ) );
+            //did the robot became friendly permanently?
+            if( one_in( 3 ) ) {
+                //it did
+                z->friendly = -1;
+            } else {
+                // it didn't
+                z->friendly = rng( 5, 40 );
+            }
+        }
+    } else {
+        who.add_msg_if_player( _( "…but the robot refuses to acknowledge you as an ally!" ) );
+    }
+    who.practice( skill_computer, 10 );
+}
+
+void robot_control_activity_actor::serialize( JsonOut &jsout ) const
+{
+    jsout.start_object();
+    jsout.member( "controlled_monster_temp_id", controlled_monster_temp_id );
+    jsout.end_object();
+}
+
+std::unique_ptr<activity_actor> robot_control_activity_actor::deserialize( JsonValue &jsin )
+{
+    robot_control_activity_actor actor;
+
+    JsonObject data = jsin.get_object();
+    data.read( "controlled_monster_temp_id", actor.controlled_monster_temp_id );
 
     return actor.clone();
 }
@@ -10644,7 +10751,6 @@ bool zone_sort_activity_actor::stage_think( player_activity &act, Character &you
     // iterate over zone positions and look for items to move
     for( const tripoint_abs_ms &src : src_sorted ) {
         placement = src;
-        coord_set.erase( src );
 
         const tripoint_bub_ms src_bub = here.get_bub( src );
         if( !here.inbounds( src_bub ) ) {
@@ -10693,13 +10799,54 @@ bool zone_sort_activity_actor::stage_think( player_activity &act, Character &you
 
 void zone_sort_activity_actor::stage_do( player_activity &act, Character &you )
 {
-    const map &here = get_map();
+    map &here = get_map();
     const zone_manager &mgr = zone_manager::get_manager();
 
     const faction_id fac_id = you.get_faction_id();
     const tripoint_abs_ms src( placement );
     const tripoint_bub_ms src_bub = here.get_bub( src );
     const tripoint_abs_ms abspos = you.pos_abs();
+
+    // Dropping off
+    if( !dropoff_coords.empty() && !picked_up_stuff.empty() ) {
+        auto dest_iter = dropoff_coords.begin();
+        while( dest_iter != dropoff_coords.end() ) {
+            const tripoint_abs_ms drop_dest = *dest_iter;
+            // Sometimes we loop back to here while still picking stuff up (because we spent all our moves picking up)
+            // Don't start trying to teleport-undrop at the destination until we're actually adjacent.
+            const bool is_adjacent_or_closer_to_dest = square_dist( abspos, drop_dest ) <= 1;
+
+            if( is_adjacent_or_closer_to_dest ) {
+                auto iter = picked_up_stuff.begin();
+                while( iter != picked_up_stuff.end() ) {
+                    if( you.get_moves() <= 0 ) { // Ran out of moves dropping stuff
+                        return;
+                    }
+
+                    // FIXME HACK: teleports item onto ground
+                    you.mod_moves( -you.item_handling_cost( **iter ) );
+                    std::vector<item_location> dropped_crap = put_into_vehicle_or_drop_ret_locs( you,
+                            item_drop_reason::deliberate, { **iter }, here.get_bub( drop_dest ) );
+                    if( !dropped_crap.empty() ) {
+                        if( const vehicle_cursor *veh_curs = iter->veh_cursor() ) {
+                            vehicle &cart_with_items = veh_curs->veh;
+                            cart_with_items.remove_item( cart_with_items.part( veh_curs->part ), iter->get_item() );
+                        } else if( iter->carrier() ) {
+                            iter->carrier()->i_rem( iter->get_item() );
+                        }
+                        iter = picked_up_stuff.erase( iter );
+                    } else {
+                        iter++; // Failed to drop for some reason?!
+                    }
+                }
+                dest_iter = dropoff_coords.erase( dest_iter ); // Done dropping stuff here.
+            } else {
+                dest_iter++; // Evaluate next dropoff
+                // FIXME: If none of the adjacent squares were valid, but we have other squares that we could drop them at then we need to handle that.
+                // That means we need to path to a new one. But only if there's nothing to pick up for sorting(?)
+            }
+        }
+    }
 
     bool is_adjacent_or_closer = square_dist( you.pos_bub(), src_bub ) <= 1;
     // before we move any item, check if player is at or
@@ -10713,6 +10860,7 @@ void zone_sort_activity_actor::stage_do( player_activity &act, Character &you )
 
     zone_sorting::unload_sort_options zone_unload_options = zone_sorting::set_unload_options( you, src,
             false );
+
 
     const std::optional<vpart_reference> vp = here.veh_at( src_bub ).cargo();
     //Skip items that have already been processed
@@ -10739,37 +10887,107 @@ void zone_sort_activity_actor::stage_do( player_activity &act, Character &you )
             return;
         }
 
-        bool can_reach_any_dest = false;
-        for( const tripoint_abs_ms &possible_dest : dest_set ) {
-            const tripoint_bub_ms dest_bub = here.get_bub( possible_dest );
-            // Routing will fail if we're already adjacent or at the destination. So we need to avoid checking it unless there's an actual route that needs to be checked.
-            const bool is_adjacent_or_closer_to_dest = square_dist( you.pos_bub(), dest_bub ) <= 1;
-            if( !is_adjacent_or_closer_to_dest &&
-                !zone_sorting::route_to_destination( you, act, dest_bub, stage ) ) {
-                continue; // Not a valid destination
+        // Picking up
+
+        if( !picked_up_stuff.empty() ) {
+            bool thisitem_shares_existing_dest = false;
+            for( const tripoint_abs_ms &possible_dest : dropoff_coords ) {
+                zone_type_id zt_dest = mgr.get_near_zone_type_for_item( thisitem, possible_dest, 0, fac_id );
+                if( zt_dest != zone_type_id() ) {
+                    // Found a valid destination.
+                    thisitem_shares_existing_dest = true;
+                    break;
+                }
             }
-            // This is a separate statement so we can have specific messaging if this failure state is reached.
-            if( here.is_open_air( dest_bub ) ) {
-                you.add_msg_if_player( _( "You can't sort things into the air!" ) );
+            if( !thisitem_shares_existing_dest ) {
+                // Skip evaluating this item. If we picked it up, we would have two separate destinations. This loop only works with *one* (set of) destination.
+                // Everything we're must holding for dropoff must be valid for the existing destination.
                 continue;
             }
-            can_reach_any_dest = true;
-            break;
         }
 
-        if( !can_reach_any_dest ) {
-            continue;
+        // FIXME HACK: teleports thisitem into inventory
+        item copy_thisitem( thisitem );
+        item_location thisitem_loc;
+        if( you.is_avatar() && you.as_avatar()->get_grab_type() == object_type::VEHICLE ) {
+            // Resolve the item location if we put it into a vehicle...
+            const tripoint_bub_ms cart_position = you.pos_bub() + you.as_avatar()->grab_point;
+            if( std::optional<vpart_reference> ovp = get_map().veh_at( cart_position ).cargo() ) {
+                vehicle &veh = ovp->vehicle();
+                std::optional<vehicle_stack::iterator> vehstack = veh.add_item( here, ovp->part(), copy_thisitem );
+                if( vehstack ) {
+                    thisitem_loc = item_location( vehicle_cursor( veh, ovp->part_index() ), &*vehstack.value() );
+                }
+            }
         }
 
-        zone_sorting::move_item( you, vp, src_bub, dest_set, thisitem, num_processed );
+        if( !thisitem_loc ) {  // We either couldn't put it in a vehicle, or didn't have one. Let's try pockets.
+            thisitem_loc = you.try_add( copy_thisitem );
+        }
+        if( !thisitem_loc ) {
+            if( !dropoff_coords.empty() && !picked_up_stuff.empty() ) {
+                you.add_msg_if_player( m_info,
+                                       _( "Not enough space to pick up %s during sorting, moving to destination with %d current items." ),
+                                       copy_thisitem.tname(), picked_up_stuff.size() );
+                break; // Stop trying to pick stuff up
+            } else if( num_processed == 1 ) {  // This is the very first item to process
+                you.add_msg_if_player( m_bad, _( "Couldn't pick up any item during sorting, aborting." ) );
+                stage = LAST;
+                return;
+            } else {
+                debugmsg( "Unexpected condition encountered while sorting items at %d, %s.", num_processed,
+                          copy_thisitem.tname() );
+            }
+        }
+        // Pickup cost
+        you.mod_moves( -you.item_handling_cost( copy_thisitem ) );
+
+        // Remove the item we just copy-teleported
+        if( vp ) {
+            vp->vehicle().remove_item( vp->part(), &thisitem );
+        } else {
+            here.i_rem( src_bub, &thisitem );
+        }
+        // Decrement the count of how many items we need to process; one just disappeared from the stack
+        num_processed--;
+
+        if( dropoff_coords.empty() ) {
+            for( const tripoint_abs_ms &possible_dest : dest_set ) {
+                const tripoint_bub_ms dest_bub = here.get_bub( possible_dest );
+                if( here.is_open_air( dest_bub ) ) {
+                    you.add_msg_if_player( _( "You can't sort things into the air!" ) );
+                    continue;
+                }
+                dropoff_coords.emplace_back( possible_dest );
+            }
+        }
+
+        if( dropoff_coords.empty() ) {
+            you.add_msg_if_player( m_info,
+                                   _( "You have items to sort.  However, there are no valid locations to sort to." ) );
+            stage = LAST;
+            return;
+        }
+
+        // OK, we can sort this!
+        picked_up_stuff.emplace_back( thisitem_loc );
         // out of moves or item was unloaded
         if( you.get_moves() <= 0 || *move_and_reset ) {
             return;
         }
     }
 
-    //this location is sorted
-    stage = THINK;
+    if( picked_up_stuff.empty() ) {
+        //this location is sorted
+        stage = THINK;
+        dropoff_coords.clear();
+    } else if( !dropoff_coords.empty() && !you.has_destination() )  {
+        zone_sorting::route_to_destination( you, act, here.get_bub( dropoff_coords.front() ), stage );
+    } else if( !you.has_destination() ) {
+        debugmsg( "Sort activity has items to sort but no valid destination, this is a bug" );
+        // Completely kick us out of this activity, something's gone wrong and we don't know what's going on.
+        stage = LAST;
+    }
 }
 
 void zone_sort_activity_actor::serialize( JsonOut &jsout ) const
@@ -10782,6 +11000,8 @@ void zone_sort_activity_actor::serialize( JsonOut &jsout ) const
     jsout.member( "coord_set", coord_set );
     jsout.member( "placement", placement );
     jsout.member( "other_activity_items", other_activity_items );
+    jsout.member( "picked_up_stuff", picked_up_stuff );
+    jsout.member( "dropoff_coords", dropoff_coords );
 
     jsout.end_object();
 }
@@ -10798,6 +11018,8 @@ std::unique_ptr<activity_actor> zone_sort_activity_actor::deserialize( JsonValue
     data.read( "coord_set", actor.coord_set );
     data.read( "placement", actor.placement );
     data.read( "other_activity_items", actor.other_activity_items );
+    data.read( "picked_up_stuff", actor.picked_up_stuff );
+    data.read( "dropoff_coords", actor.dropoff_coords );
 
     return actor.clone();
 }
@@ -10874,6 +11096,7 @@ deserialize_functions = {
     { ACT_READ, &read_activity_actor::deserialize },
     { ACT_REEL_CABLE, &reel_cable_activity_actor::deserialize },
     { ACT_RELOAD, &reload_activity_actor::deserialize },
+    { ACT_ROBOT_CONTROL, &robot_control_activity_actor::deserialize },
     { ACT_SHAVE, &shave_activity_actor::deserialize },
     { ACT_SHEARING, &shearing_activity_actor::deserialize },
     { ACT_SKIN, &butchery_activity_actor::deserialize },
