@@ -47,6 +47,7 @@
 #include "harvest.h"
 #include "input_context.h"
 #include "input_enums.h"
+#include "input_popup.h"
 #include "inventory.h"
 #include "item.h"
 #include "item_components.h"
@@ -79,7 +80,6 @@
 #include "rng.h"
 #include "sounds.h"
 #include "string_formatter.h"
-#include "string_input_popup.h"
 #include "talker.h"  // IWYU pragma: keep
 #include "tileray.h"
 #include "timed_event.h"
@@ -306,6 +306,7 @@ static const trait_id trait_BADKNEES( "BADKNEES" );
 static const trait_id trait_BEAK_HUM( "BEAK_HUM" );
 static const trait_id trait_BURROW( "BURROW" );
 static const trait_id trait_BURROWLARGE( "BURROWLARGE" );
+static const trait_id trait_CANNOT_GAIN_PSIONICS( "CANNOT_GAIN_PSIONICS" );
 static const trait_id trait_DEBUG_HS( "DEBUG_HS" );
 static const trait_id trait_ESPER_ADVANCEMENT_OKAY( "ESPER_ADVANCEMENT_OKAY" );
 static const trait_id trait_ESPER_STARTER_ADVANCEMENT_OKAY( "ESPER_STARTER_ADVANCEMENT_OKAY" );
@@ -569,6 +570,9 @@ void iexamine::genemill( Character &you, const tripoint_bub_ms & )
     if( you.has_permanent_trait( trait_ESPER_STARTER_ADVANCEMENT_OKAY ) ) {
         you.remove_mutation( trait_ESPER_STARTER_ADVANCEMENT_OKAY );
     }
+
+    // Add a trait to prevent later esper enkindling
+    you.set_mutation( trait_CANNOT_GAIN_PSIONICS );
 
     //Handle Thesholds changing/removal.
     auto highest_id = std::max_element( you.mutation_category_level.begin(),
@@ -1952,6 +1956,18 @@ void iexamine::pit_covered( Character &you, const tripoint_bub_ms &examp )
         here.ter_set( examp, ter_t_pit_glass );
     }
     you.mod_moves( -to_moves<int>( 1_seconds ) );
+}
+
+void iexamine::thin_ice( Character &you, const tripoint_bub_ms &examp )
+{
+    map &here = get_map();
+    const trap &tr = here.tr_at( examp );
+    if( !you.knows_trap( examp ) ) {
+        you.add_msg_if_player( m_warning, _( "The ice looks thin and won't support your weight." ) );
+        you.add_known_trap( examp, tr );
+    } else {
+        you.add_msg_if_player( m_info, _( "The ice here is thin." ) );
+    }
 }
 
 
@@ -5264,10 +5280,10 @@ void iexamine::sign( Character &you, const tripoint_bub_ms &examp )
                                         _( "Add a message to the sign?" );
             std::string ignore_message = _( "You leave the sign alone." );
             if( query_yn( query_message ) ) {
-                std::string signage = string_input_popup()
-                                      .title( _( "Write what?" ) )
-                                      .identifier( "signage" )
-                                      .query_string();
+                string_input_popup_imgui write_popup( 50 );
+                write_popup.set_label( _( "Write what?" ) );
+                write_popup.set_identifier( "signage" );
+                std::string signage = write_popup.query();
                 if( signage.empty() ) {
                     you.add_msg_if_player( m_neutral, ignore_message );
                 } else {
@@ -7689,6 +7705,7 @@ iexamine_functions iexamine_functions_from_string( const std::string &function_n
             { "portable_structure", &iexamine::portable_structure },
             { "pit", &iexamine::pit },
             { "pit_covered", &iexamine::pit_covered },
+            { "thin_ice", &iexamine::thin_ice },
             { "safe", &iexamine::safe },
             { "bulletin_board", &iexamine::bulletin_board },
             { "pedestal_wyrm", &iexamine::pedestal_wyrm },
