@@ -376,7 +376,7 @@
     "color": "green",
     "use_action": {
       "type": "learn_spell",
-      "spells": [ "druid_veggrasp", "druid_summon_brambles", "seed_of_growth", "druid_natures_commune", "druid_healing_herb" ]
+      "spells": [ "druid_veggrasp", "druid_summon_brambles", "druid_growth", "druid_natures_commune", "druid_healing_herb" ]
     }
   },
   {
@@ -452,7 +452,14 @@
     "color": "light_gray",
     "use_action": {
       "type": "learn_spell",
-      "spells": [ "magus_mana_beam", "magus_mana_bolt", "magus_mana_blast", "magus_summon_impact_sling", "magus_mage_conjured_armor" ]
+      "spells": [
+        "magus_mana_beam",
+        "magus_mana_bolt",
+        "magus_mana_blast",
+        "magus_summon_impact_sling",
+        "magus_mage_conjured_armor",
+        "magus_mage_conjured_blade"
+      ]
     }
   },
   {
@@ -1345,7 +1352,7 @@
       "type": "learn_spell",
       "spells": [
         "kelvinist_firebolt",
-        "spell_scroll_point_flare",
+        "point_flare",
         "kelvinist_extinguish_fire_spell",
         "create_lighter",
         "kelvinist_heat_food",

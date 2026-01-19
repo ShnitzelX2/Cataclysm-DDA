@@ -125,10 +125,12 @@
 #include "veh_utils.h"
 #include "vehicle.h"
 #include "vehicle_selector.h"
+#include "visitable.h"
 #include "vpart_position.h"
 #include "vpart_range.h"
 
 static const activity_id ACT_AIM( "ACT_AIM" );
+static const activity_id ACT_ATM( "ACT_ATM" );
 static const activity_id ACT_AUTODRIVE( "ACT_AUTODRIVE" );
 static const activity_id ACT_BASH( "ACT_BASH" );
 static const activity_id ACT_BIKERACK_RACKING( "ACT_BIKERACK_RACKING" );
@@ -232,6 +234,7 @@ static const activity_id ACT_WORKOUT_LIGHT( "ACT_WORKOUT_LIGHT" );
 static const activity_id ACT_WORKOUT_MODERATE( "ACT_WORKOUT_MODERATE" );
 
 static const ammotype ammo_battery( "battery" );
+static const ammotype ammo_money( "money" );
 static const ammotype ammo_plutonium( "plutonium" );
 
 static const bionic_id bio_painkiller( "bio_painkiller" );
@@ -242,6 +245,7 @@ static const efftype_id effect_blind( "blind" );
 static const efftype_id effect_docile( "docile" );
 static const efftype_id effect_downed( "downed" );
 static const efftype_id effect_gliding( "gliding" );
+static const efftype_id effect_magic_channeling( "magic_channeling" );
 static const efftype_id effect_narcosis( "narcosis" );
 static const efftype_id effect_paid( "paid" );
 static const efftype_id effect_pet( "pet" );
@@ -280,6 +284,7 @@ static const item_group_id Item_spawn_data_forage_winter( "forage_winter" );
 static const itype_id itype_2x4( "2x4" );
 static const itype_id itype_animal( "animal" );
 static const itype_id itype_battery( "battery" );
+static const itype_id itype_cash_card( "cash_card" );
 static const itype_id itype_detergent( "detergent" );
 static const itype_id itype_disassembly( "disassembly" );
 static const itype_id itype_efile_junk( "efile_junk" );
@@ -1602,7 +1607,7 @@ void bionic_operation_activity_actor::do_turn( player_activity &act, Character &
             if( std::optional<bionic *> bio = who.find_bionic_by_uid( uninstalled_bionic ) ) {
                 who.perform_uninstall( **bio, operation_difficulty, operation_success, operation_skill );
             } else {
-                debugmsg( _( "Tried to uninstall bionic with UID %s, but you don't have this bionic installed." ),
+                debugmsg( _( "Tried to uninstall bionic with UID %u, but you don't have this bionic installed." ),
                           uninstalled_bionic );
                 who.remove_effect( effect_under_operation );
                 act.set_to_null();
@@ -1623,7 +1628,7 @@ void bionic_operation_activity_actor::do_turn( player_activity &act, Character &
                 who.perform_install( bid, upbio_uid, operation_difficulty, operation_success, operation_skill,
                                      installer_name, bid->canceled_mutations, actor_pos );
             } else {
-                debugmsg( _( "%s is no a valid bionic_id" ), bid.c_str() );
+                debugmsg( _( "%s is not a valid bionic_id" ), bid.c_str() );
                 who.remove_effect( effect_under_operation );
                 act.set_to_null();
             }
@@ -2759,6 +2764,10 @@ void spellcasting_activity_actor::finish( player_activity &act, Character &who )
                     spell_being_cast.spell_class(), spell_being_cast.get_difficulty( who ),
                     spell_being_cast.energy_cost( who ), spell_being_cast.casting_time( who ),
                     spell_being_cast.damage( who ) );
+        }
+        who.last_magic_target_pos = get_map().get_abs( *target );
+        if( spell_being_cast.is_channeling_spell() ) {
+            who.add_effect( effect_magic_channeling, calendar::INDEFINITELY_LONG_DURATION );
         }
     }
 }
@@ -4219,6 +4228,211 @@ bool efile_activity_actor::efile_skip_copy( const efile_transfer &transfer, cons
         return check_for_file( transfer.used_edevice ) && check_for_file( transfer.target_edevice );
     }
     return false;
+}
+
+void atm_activity_actor::start( player_activity &act, Character & )
+{
+    time_duration total_time = 0_seconds;
+    switch( option_selected ) {
+        case purchase_card:
+            total_time = 5_seconds;
+            break;
+        case deposit_money:
+        case withdraw_money:
+            total_time = 10_seconds;
+            break;
+        case exchange_cash:
+        case transfer_all_money:
+        default:
+            break;
+    }
+    act.moves_total = to_moves<int>( total_time );
+    act.moves_left = act.moves_total;
+}
+
+void atm_activity_actor::do_turn( player_activity &act, Character &who )
+{
+
+    if( option_selected == exchange_cash ) {
+        // while the ATM activity is time-based, this option runs until invalid
+        act.moves_left = calendar::INDEFINITELY_LONG;
+        // get cash card
+        item *destination_cash_card;
+        const std::vector<item *> cash_cards = who.cache_get_items_with( "is_cash_card",
+                                               &item::is_cash_card );
+        if( cash_cards.empty() ) {
+            popup( _( "You do not have a cash card." ) );
+            act.set_to_null();
+            return;
+        }
+        destination_cash_card = *std::max_element( cash_cards.begin(), cash_cards.end(), []( const item * a,
+        const item * b ) {
+            return a->ammo_remaining() < b->ammo_remaining();
+        } );
+
+        // get first physical cash item; deposit exactly one bill per turn
+        item *cash_item = nullptr;
+        who.visit_items( [&]( item * e, const item * ) {
+            if( e->type->has_flag( flag_OLD_CURRENCY ) ) {
+                cash_item = e;
+                return VisitResponse::ABORT;
+            }
+            return VisitResponse::NEXT;
+        } );
+        if( !cash_item ) {
+            finish( act, who );
+            return;
+        }
+
+        // immediately convert bill to e-money
+        int value = units::to_cent( cash_item->type->price );
+        value *= 0.99;  // subtract fee
+        if( value > destination_cash_card->ammo_capacity( ammo_money ) -
+            destination_cash_card->ammo_remaining() ) {
+            popup( _( "Destination card is full." ) );
+            act.set_to_null();
+            return;
+        }
+        if( cash_item->charges > 1 ) {
+            cash_item->charges--;
+        } else {
+            item_location( who, cash_item ).remove_item();
+        }
+        destination_cash_card->ammo_set( destination_cash_card->ammo_default(),
+                                         destination_cash_card->ammo_remaining() + value );
+
+    } else if( option_selected == transfer_all_money ) {
+        // while the ATM activity is time-based, this option runs until invalid
+        act.moves_left = calendar::INDEFINITELY_LONG;
+        // get first available cash card
+        item *destination_cash_card;
+        std::vector<item *> cash_cards_on_hand = who.cache_get_items_with( "is_cash_card",
+                &item::is_cash_card );
+        // if there aren't any, then we're done
+        if( cash_cards_on_hand.empty() ) {
+            add_msg( m_info, _( "You do not have any cash cards!" ) );
+            act.set_to_null();
+            return;
+        }
+        destination_cash_card = *cash_cards_on_hand.begin();
+
+        bool card_transferred = false;
+        // find first available non-destination cash card with e-cash, re-run next turn
+        for( item *cash_card_withdraw : cash_cards_on_hand ) {
+            if( cash_card_withdraw == destination_cash_card ||
+                cash_card_withdraw->ammo_remaining() <= 0 ||
+                cash_card_withdraw->typeId() != itype_cash_card ) {
+                continue;
+            }
+            // should we check for max capacity here?
+            if( cash_card_withdraw->ammo_remaining() >
+                destination_cash_card->ammo_capacity( ammo_money ) - destination_cash_card->ammo_remaining() ) {
+                add_msg( m_info,
+                         _( "Your highest-value cash card is full; remove from inventory and try another cash card." ) );
+                act.set_to_null();
+                return;
+            }
+            destination_cash_card->ammo_set( destination_cash_card->ammo_default(),
+                                             cash_card_withdraw->ammo_remaining() + destination_cash_card->ammo_remaining() );
+            cash_card_withdraw->ammo_set( cash_card_withdraw->ammo_default(), 0 );
+            card_transferred = true;
+            break;
+        }
+        if( !card_transferred ) {
+            finish( act, who );
+            return;
+        }
+    }
+}
+
+void atm_activity_actor::finish( player_activity &act, Character &who )
+{
+    act.set_to_null();
+    if( option_selected == purchase_card ) {
+        item card( itype_cash_card, calendar::turn );
+        card.ammo_set( card.ammo_default(), 0 );
+        who.i_add( card );
+        who.cash -= 1000;
+    } else if( option_selected == deposit_money ) {
+        add_msg( m_info, _( "You deposit %s into your account." ), format_money( cash_amount ) );
+        who.use_charges( itype_cash_card, cash_amount );
+        who.cash += cash_amount;
+    } else if( option_selected == withdraw_money ) {
+        std::vector<item *> cash_cards_on_hand = who.cache_get_items_with( "is_cash_card",
+                &item::is_cash_card );
+        if( cash_cards_on_hand.empty() ) {
+            //Just in case we run into an edge case
+            add_msg( m_info, _( "You do not have a cash card to withdraw money!" ) );
+            act.set_to_null();
+            return;
+        }
+
+        int inserted = 0;
+        int remaining = cash_amount;
+
+        std::sort( cash_cards_on_hand.begin(), cash_cards_on_hand.end(), []( item * one, item * two ) {
+            int balance_one = one->ammo_remaining();
+            int balance_two = two->ammo_remaining();
+            return balance_one > balance_two;
+        } );
+
+        for( item * const &cc : cash_cards_on_hand ) {
+            if( inserted == cash_amount ) {
+                break;
+            }
+            int max_cap = cc->ammo_capacity( ammo_money ) - cc->ammo_remaining();
+            int to_insert = std::min( max_cap, remaining );
+            // insert whatever there's room for + the old balance.
+            cc->ammo_set( cc->ammo_default(), to_insert + cc->ammo_remaining() );
+            inserted += to_insert;
+            remaining -= to_insert;
+        }
+
+        if( remaining ) {
+            add_msg( m_info, _( "All cash cards at maximum capacity." ) );
+        }
+        who.cash -= cash_amount - remaining;
+
+    } else if( option_selected == exchange_cash ) {
+        add_msg( m_info, _( "You have exchanged all of your cash." ) );
+        return;
+    } else if( option_selected == transfer_all_money ) {
+        add_msg( m_info, _( "You have consolidated all of your cash cards." ) );
+        return;
+    }
+
+    if( who.cash < 0 ) {
+        add_msg( m_info, _( "Your debt is now %s." ), format_money( who.cash ) );
+    } else {
+        add_msg( m_info, _( "Your account now holds %s." ), format_money( who.cash ) );
+    }
+
+}
+
+
+void atm_activity_actor::serialize( JsonOut &jsout ) const
+{
+    jsout.start_object();
+
+    jsout.member( "option_selected", static_cast<int>( option_selected ) );
+    jsout.member( "cash_amount", cash_amount );
+
+    jsout.end_object();
+}
+
+std::unique_ptr<activity_actor> atm_activity_actor::deserialize( JsonValue &jsin )
+{
+    atm_activity_actor actor;
+
+    JsonObject data = jsin.get_object();
+
+    int option_as_int = 0;
+    data.read( "option_selected", option_as_int );
+    data.read( "cash_amount", actor.cash_amount );
+
+    actor.option_selected = static_cast<atm_options>( option_as_int );
+
+    return actor.clone();
 }
 
 // fish-with-rod fish catching function.
@@ -11441,7 +11655,7 @@ void zone_sort_activity_actor::stage_do( player_activity &act, Character &you )
         if( !thisitem_loc ) {
             if( !dropoff_coords.empty() && !picked_up_stuff.empty() ) {
                 you.add_msg_if_player( m_info,
-                                       _( "Not enough space to pick up %s during sorting, moving to destination with %d current items." ),
+                                       _( "Not enough space to pick up %s during sorting, moving to destination with %zu current items." ),
                                        copy_thisitem.tname(), picked_up_stuff.size() );
                 break; // Stop trying to pick stuff up
             } else if( num_processed == 1 ) {  // This is the very first item to process
@@ -11545,6 +11759,7 @@ namespace activity_actors
 const std::unordered_map<activity_id, std::unique_ptr<activity_actor>( * )( JsonValue & )>
 deserialize_functions = {
     { ACT_AIM, &aim_activity_actor::deserialize },
+    { ACT_ATM, &atm_activity_actor::deserialize },
     { ACT_AUTODRIVE, &autodrive_activity_actor::deserialize },
     { ACT_BASH, &bash_activity_actor::deserialize },
     { ACT_BIKERACK_RACKING, &bikerack_racking_activity_actor::deserialize },
