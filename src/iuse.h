@@ -251,10 +251,12 @@ struct heating_requirements {
 struct heater {
     item_location loc;
     bool consume_flag;
-    int available_heater;
+    int available_heater; // NOLINT(cata-serialize)
     int heating_effect;
     tripoint_abs_ms vpt;
     bool pseudo_flag;
+    void serialize( JsonOut &jsout ) const;
+    void deserialize( const JsonValue &jsin );
 };
 heater find_heater( Character *, item *, bool force_use_it );
 heating_requirements heating_requirements_for_weight( const units::mass &,
