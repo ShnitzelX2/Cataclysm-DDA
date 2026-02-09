@@ -3332,11 +3332,9 @@ std::unordered_set<tripoint_abs_ms> multi_mop_activity_actor::multi_activity_loc
     return src_set;
 }
 
-namespace multi_activity_actor
-{
-
-bool farm_do( Character &you, const activity_reason_info &act_info,
-              const tripoint_abs_ms &src, const tripoint_bub_ms &src_loc )
+bool multi_farm_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &src, const tripoint_bub_ms &src_loc )
 {
 
     const map &here = get_map();
@@ -3388,8 +3386,9 @@ bool farm_do( Character &you, const activity_reason_info &act_info,
     return true;
 }
 
-bool chop_planks_do( Character &you, const activity_reason_info &act_info,
-                     const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
+bool multi_chop_planks_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
 {
 
     const do_activity_reason &reason = act_info.reason;
@@ -3403,8 +3402,9 @@ bool chop_planks_do( Character &you, const activity_reason_info &act_info,
     return true;
 }
 
-bool butcher_do( Character &you, const activity_reason_info &act_info,
-                 const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
+bool multi_butchery_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
 {
 
     const do_activity_reason &reason = act_info.reason;
@@ -3419,8 +3419,9 @@ bool butcher_do( Character &you, const activity_reason_info &act_info,
     return true;
 }
 
-bool read_do( Character &you, const activity_reason_info &act_info,
-              const tripoint_abs_ms &, const tripoint_bub_ms & )
+bool multi_read_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &, const tripoint_bub_ms & )
 {
     const do_activity_reason &reason = act_info.reason;
 
@@ -3442,8 +3443,9 @@ bool read_do( Character &you, const activity_reason_info &act_info,
     return true;
 }
 
-bool study_do( Character &you, const activity_reason_info &act_info,
-               const tripoint_abs_ms &src, const tripoint_bub_ms & )
+bool multi_study_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &src, const tripoint_bub_ms & )
 {
     const do_activity_reason &reason = act_info.reason;
 
@@ -3466,8 +3468,9 @@ bool study_do( Character &you, const activity_reason_info &act_info,
     return true;
 }
 
-bool construction_do( Character &you, const activity_reason_info &act_info,
-                      const tripoint_abs_ms &src, const tripoint_bub_ms &src_loc )
+bool multi_build_construction_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &src, const tripoint_bub_ms &src_loc )
 {
     map &here = get_map();
     const do_activity_reason &reason = act_info.reason;
@@ -3490,8 +3493,9 @@ bool construction_do( Character &you, const activity_reason_info &act_info,
     return true;
 }
 
-bool fetch_do( Character &you, const activity_reason_info &act_info,
-               const tripoint_abs_ms &, const tripoint_bub_ms & )
+bool fetch_required_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &, const tripoint_bub_ms & )
 {
     const do_activity_reason &reason = act_info.reason;
 
@@ -3508,9 +3512,9 @@ bool fetch_do( Character &you, const activity_reason_info &act_info,
     return true;
 }
 
-
-bool chop_trees_do( Character &you, const activity_reason_info &act_info,
-                    const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
+bool multi_chop_trees_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
 {
     const do_activity_reason &reason = act_info.reason;
 
@@ -3523,8 +3527,9 @@ bool chop_trees_do( Character &you, const activity_reason_info &act_info,
     return true;
 }
 
-bool fish_do( Character &you, const activity_reason_info &act_info,
-              const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
+bool multi_fish_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
 {
     const do_activity_reason &reason = act_info.reason;
 
@@ -3540,8 +3545,9 @@ bool fish_do( Character &you, const activity_reason_info &act_info,
     return true;
 }
 
-bool mine_do( Character &you, const activity_reason_info &act_info,
-              const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
+bool multi_mine_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
 {
     const do_activity_reason &reason = act_info.reason;
 
@@ -3555,8 +3561,9 @@ bool mine_do( Character &you, const activity_reason_info &act_info,
     return true;
 }
 
-bool mop_do( Character &you, const activity_reason_info &act_info,
-             const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
+bool multi_mop_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
 {
     const do_activity_reason &reason = act_info.reason;
 
@@ -3569,8 +3576,9 @@ bool mop_do( Character &you, const activity_reason_info &act_info,
     return true;
 }
 
-bool vehicle_deconstruction_do( Character &you, const activity_reason_info &act_info,
-                                const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
+bool multi_vehicle_deconstruct_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
 {
     const do_activity_reason &reason = act_info.reason;
 
@@ -3584,8 +3592,9 @@ bool vehicle_deconstruction_do( Character &you, const activity_reason_info &act_
     return true;
 }
 
-bool vehicle_repair_do( Character &you, const activity_reason_info &act_info,
-                        const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
+bool multi_vehicle_repair_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
 {
     const do_activity_reason &reason = act_info.reason;
 
@@ -3600,8 +3609,9 @@ bool vehicle_repair_do( Character &you, const activity_reason_info &act_info,
     return true;
 }
 
-bool craft_do( Character &you, const activity_reason_info &act_info,
-               const tripoint_abs_ms &, const tripoint_bub_ms & )
+bool multi_craft_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &, const tripoint_bub_ms & )
 {
     const do_activity_reason &reason = act_info.reason;
 
@@ -3623,8 +3633,9 @@ bool craft_do( Character &you, const activity_reason_info &act_info,
     return true;
 }
 
-bool disassemble_do( Character &you, const activity_reason_info &act_info,
-                     const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
+bool multi_disassemble_activity_actor::multi_activity_do( Character &you,
+        const activity_reason_info &act_info,
+        const tripoint_abs_ms &, const tripoint_bub_ms &src_loc )
 {
     const do_activity_reason &reason = act_info.reason;
     map &here = get_map();
@@ -3658,6 +3669,9 @@ bool disassemble_do( Character &you, const activity_reason_info &act_info,
     }
     return true;
 }
+
+namespace multi_activity_actor
+{
 
 void activity_failure_message( Character &you, activity_id new_activity,
                                const requirement_failure_reasons &fail_reason, bool no_locations )
