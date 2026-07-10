@@ -256,7 +256,7 @@ void game::unserialize_impl( const JsonObject &data )
     calendar::initial_season = static_cast<season_type>( data.get_int( "initial_season",
                                static_cast<int>( SPRING ) ) );
 
-    std::string loaded_dimension_prefix;
+    dimension_id loaded_dimension_prefix;
     if( data.read( "dimension_prefix", loaded_dimension_prefix ) ) {
         dimension_prefix = loaded_dimension_prefix;
         load_dimension_data();
@@ -1755,8 +1755,6 @@ void game::unserialize_dimension_data( const JsonValue &jv )
             overmap_buffer.global_state.deserialize( jsin );
         } else if( name == "placed_unique_specials" ) {
             overmap_buffer.deserialize_placed_unique_specials( jsin );
-        } else if( name == "region_type" ) {
-            jsin.read( overmap_buffer.current_region_type );
         } else if( name == "power_networks" ) {
             power_networks().deserialize( jsin );
         }
@@ -1949,8 +1947,6 @@ void game::serialize_dimension_data( std::ostream &fout )
 
         json.member( "weather" );
         weather_manager::serialize_all( json );
-
-        json.member( "region_type", overmap_buffer.current_region_type );
 
         json.member( "power_networks" );
         power_networks().serialize( json );
