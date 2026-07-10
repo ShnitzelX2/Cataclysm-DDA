@@ -789,6 +789,7 @@ bool game::start_game()
     init_autosave();
     //Needs to be explicitly reset so a previously loaded world state doesn't leak into the new game
     dimension_prefix = dimension_default;
+    overmap_buffer.init_region_layout();
 
     background_pane background;
     static_popup popup;
@@ -827,6 +828,7 @@ bool game::start_game()
 
             MAPBUFFER.clear();
             overmap_buffer.clear();
+            overmap_buffer.init_region_layout();
 
             if( !query_yn(
                     _( "Try again?\n\nIt may require several attempts until the game finds a valid starting location." ) ) ) {
@@ -9816,6 +9818,7 @@ bool game::travel_to_dimension( dimension_id dimension_destination,
     swapping_dimensions = true;
     // Clear the overmap
     overmap_buffer.clear();
+    overmap_buffer.init_region_layout();
     // load/create new overmap
     overmap &new_om = overmap_buffer.get( project_to<coords::om>( player.pos_abs().xy() ) );
     // insert travelled NPCs

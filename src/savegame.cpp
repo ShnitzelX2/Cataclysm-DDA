@@ -52,6 +52,8 @@
 
 class overmap_connection;
 
+static const dimension_id dimension_default( "default" );
+
 static const mongroup_id GROUP_ZOMBIE( "GROUP_ZOMBIE" );
 static const mongroup_id GROUP_ZOMBIE_HORDE( "GROUP_ZOMBIE_HORDE" );
 
@@ -258,6 +260,10 @@ void game::unserialize_impl( const JsonObject &data )
 
     dimension_id loaded_dimension_prefix;
     if( data.read( "dimension_prefix", loaded_dimension_prefix ) ) {
+        if( !loaded_dimension_prefix.is_valid() ) {
+            debugmsg( "invalid dimension loaded, using default dimension instead" );
+            loaded_dimension_prefix = dimension_default;
+        }
         dimension_prefix = loaded_dimension_prefix;
         load_dimension_data();
     }
@@ -2105,6 +2111,7 @@ void overmap_global_state::serialize( JsonOut &json ) const
     json.member( "overmap_highway_intersection_grid", highway_intersections );
     json.member( "major_river_count", major_river_count );
     json.member( "unique_special_decks", unique_special_decks );
+    json.member( "placed_regions", placed_regions );
 
     json.end_object();
 }
@@ -2136,6 +2143,7 @@ void overmap_global_state::deserialize( const JsonObject &json )
     json.read( "major_river_count", major_river_count );
     unique_special_decks.clear();
     json.read( "unique_special_decks", unique_special_decks );
+    json.read( "placed_regions", placed_regions );
 }
 
 void overmapbuffer::deserialize_placed_unique_specials( const JsonValue &jsin )
