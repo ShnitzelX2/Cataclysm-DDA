@@ -1158,6 +1158,56 @@ std::vector<coords::coord_point_ib<Point, Origin, Scale>>
     return closest_points_first( loc, 0, max_dist );
 }
 
+// construct a maximum point using the maximum value of every dimension from a set of points
+template<typename Point, coords::origin Origin, coords::scale Scale>
+coords::coord_point_ob<Point, Origin, Scale> construct_max( const
+        std::vector< coords::coord_point_ob<Point, Origin, Scale>> &locs )
+{
+    if( locs.empty() ) {
+        return coords::coord_point_ob<Point, Origin, Scale>();
+    }
+    int x = locs.begin()->x();
+    int y = locs.begin()->y();
+    int z = locs.begin()->z();
+    for( const coords::coord_point_ob<Point, Origin, Scale> &p : locs ) {
+        if( p.x() > x ) {
+            x = p.x();
+        }
+        if( p.y() > y ) {
+            y = p.y();
+        }
+        if( p.z() > z ) {
+            z = p.z();
+        }
+    }
+    return coords::coord_point_ob<Point, Origin, Scale>( x, y, z );
+}
+
+// construct a minimum point using the minimum value of every dimension from a set of points
+template<typename Point, coords::origin Origin, coords::scale Scale>
+coords::coord_point_ob<Point, Origin, Scale> construct_min( const
+        std::vector< coords::coord_point_ob<Point, Origin, Scale>> &locs )
+{
+    if( locs.empty() ) {
+        return coords::coord_point_ob<Point, Origin, Scale>();
+    }
+    int x = locs.begin()->x();
+    int y = locs.begin()->y();
+    int z = locs.begin()->z();
+    for( const coords::coord_point_ob<Point, Origin, Scale> &p : locs ) {
+        if( p.x() < x ) {
+            x = p.x();
+        }
+        if( p.y() < y ) {
+            y = p.y();
+        }
+        if( p.z() < z ) {
+            z = p.z();
+        }
+    }
+    return coords::coord_point_ob<Point, Origin, Scale>( x, y, z );
+}
+
 /* find appropriate subdivided coordinates for absolute tile coordinate.
  * This is less obvious than one might think, for negative coordinates, so this
  * was created to give a definitive answer.
