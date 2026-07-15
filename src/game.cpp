@@ -469,7 +469,8 @@ game::game() :
     next_mission_id( 1 ),
     next_item_uid( 1 ),
     remoteveh_cache_time( calendar::before_time_starts ),
-    last_mouse_edge_scroll( std::chrono::steady_clock::now() )
+    last_mouse_edge_scroll( std::chrono::steady_clock::now() ),
+    dimension_prefix( dimension_world_default )
 {
     current_map.set( &m );
     first_redraw_since_waiting_started = true;
