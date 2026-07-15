@@ -1,12 +1,24 @@
 #include "coordinates.h"
+#include "debug.h"
+#include "enum_conversions.h"
+#include "flexbuffer_json.h"
 #include "game.h"
 #include "generic_factory.h"
 #include "imgui/imgui.h"
-#include "line.h"
+#include "map_iterator.h"
+#include "output.h"
 #include "overmapbuffer.h"
 #include "overmap_worldgen.h"
+#include "string_formatter.h"
+#include "translations.h"
 
-static const dimension_region_layout_id dimension_regions_default( "default" );
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+struct region_settings;
+
+static const dimension_region_layout_id dimension_region_layout_default( "default" );
 
 void overmapbuffer::init_region_layout()
 {
@@ -91,7 +103,7 @@ namespace
 {
 generic_factory<dimension_region_layout> dimension_regions_factory( "dimension_region_layout" );
 generic_factory<dimension_world> dimension_factory( "dimension" );
-}
+} // namespace
 
 template<>
 const dimension_region_layout &string_id<dimension_region_layout>::obj() const
@@ -124,9 +136,8 @@ void dimension_world::load_dimensions( const JsonObject &jo,
     dimension_factory.load( jo, src );
 }
 
-void dimension_world::load( const JsonObject &jo, const std::string &src )
+void dimension_world::load( const JsonObject &jo, const std::string_view & )
 {
-
     jo.read( "region_layout", region_layout );
 }
 
@@ -135,7 +146,7 @@ void dimension_world::finalize()
     if( !region_layout.is_valid() ) {
         debugmsg( string_format( "invalid region layout %s loaded for dimension %s; switching to default",
                                  region_layout.str(), id.str() ) );
-        region_layout = dimension_regions_default;
+        region_layout = dimension_region_layout_default;
     }
 }
 
@@ -145,15 +156,15 @@ void dimension_world::finalize_all()
 }
 
 template<typename T>
-void load_layout_generator( const JsonObject &jo,
-                            std::shared_ptr<dimension_region_layout_generator> &layout_generator )
+static void load_layout_generator( const JsonObject &jo,
+                                   std::shared_ptr<dimension_region_layout_generator> &layout_generator )
 {
     T generator;
     generator.deserialize( jo );
     layout_generator = std::make_unique<T>( generator );
 }
 
-void dimension_region_layout::load( const JsonObject &jo, const std::string &src )
+void dimension_region_layout::load( const JsonObject &jo, const std::string_view & )
 {
 
     jo.read( "generation_mode", generation_mode );
@@ -218,7 +229,7 @@ void overmapbuffer::print_region_layout()
         }
     }
 
-    for( const std::pair< region_settings_id, char> &region_char : printed_region_char ) {
+    for( const std::pair< const string_id<region_settings>, char> &region_char : printed_region_char ) {
         total_output += string_format( "%c = %s", region_char.second, region_char.first.str() ) + '\n';
     }
 

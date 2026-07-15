@@ -52,7 +52,7 @@
 
 class overmap_connection;
 
-static const dimension_id dimension_default( "default" );
+static const dimension_id dimension_world_default( "default" );
 
 static const mongroup_id GROUP_ZOMBIE( "GROUP_ZOMBIE" );
 static const mongroup_id GROUP_ZOMBIE_HORDE( "GROUP_ZOMBIE_HORDE" );
@@ -262,7 +262,7 @@ void game::unserialize_impl( const JsonObject &data )
     if( data.read( "dimension_prefix", loaded_dimension_prefix ) ) {
         if( !loaded_dimension_prefix.is_valid() ) {
             debugmsg( "invalid dimension loaded, using default dimension instead" );
-            loaded_dimension_prefix = dimension_default;
+            loaded_dimension_prefix = dimension_world_default;
         }
         dimension_prefix = loaded_dimension_prefix;
         load_dimension_data();

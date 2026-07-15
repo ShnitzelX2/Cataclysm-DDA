@@ -49,7 +49,7 @@
 #include "weather.h"
 #include "weather_type.h"
 
-static const dimension_id dimension_default( "default" );
+static const dimension_id dimension_world_default( "default" );
 
 static const efftype_id effect_haslight( "haslight" );
 static const efftype_id effect_onfire( "onfire" );
@@ -99,7 +99,7 @@ static light_color_rgb cached_twilight_color()
 
 light_color_rgb dawn_dusk_color_for_lightmap( dimension_id dimension )
 {
-    if( dimension != dimension_default ) {
+    if( dimension != dimension_world_default ) {
         return {};
     }
     return cached_twilight_color();

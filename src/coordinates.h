@@ -1166,21 +1166,20 @@ coords::coord_point_ob<Point, Origin, Scale> construct_max( const
     if( locs.empty() ) {
         return coords::coord_point_ob<Point, Origin, Scale>();
     }
-    int x = locs.begin()->x();
-    int y = locs.begin()->y();
-    int z = locs.begin()->z();
+    coords::coord_point_ob<Point, Origin, Scale> constructed_max( locs.begin()->x(), locs.begin()->y(),
+            locs.begin()->z() );
     for( const coords::coord_point_ob<Point, Origin, Scale> &p : locs ) {
-        if( p.x() > x ) {
-            x = p.x();
+        if( p.x() > constructed_max.x() ) {
+            constructed_max.x() = p.x();
         }
-        if( p.y() > y ) {
-            y = p.y();
+        if( p.y() > constructed_max.y() ) {
+            constructed_max.y() = p.y();
         }
-        if( p.z() > z ) {
-            z = p.z();
+        if( p.z() > constructed_max.z() ) {
+            constructed_max.z() = p.z();
         }
     }
-    return coords::coord_point_ob<Point, Origin, Scale>( x, y, z );
+    return constructed_max;
 }
 
 // construct a minimum point using the minimum value of every dimension from a set of points
@@ -1191,21 +1190,20 @@ coords::coord_point_ob<Point, Origin, Scale> construct_min( const
     if( locs.empty() ) {
         return coords::coord_point_ob<Point, Origin, Scale>();
     }
-    int x = locs.begin()->x();
-    int y = locs.begin()->y();
-    int z = locs.begin()->z();
+    coords::coord_point_ob<Point, Origin, Scale> constructed_min( locs.begin()->x(), locs.begin()->y(),
+            locs.begin()->z() );
     for( const coords::coord_point_ob<Point, Origin, Scale> &p : locs ) {
-        if( p.x() < x ) {
-            x = p.x();
+        if( p.x() < constructed_min.x() ) {
+            constructed_min.x() = p.x();
         }
-        if( p.y() < y ) {
-            y = p.y();
+        if( p.y() < constructed_min.y() ) {
+            constructed_min.y() = p.y();
         }
-        if( p.z() < z ) {
-            z = p.z();
+        if( p.z() < constructed_min.z() ) {
+            constructed_min.z() = p.z();
         }
     }
-    return coords::coord_point_ob<Point, Origin, Scale>( x, y, z );
+    return constructed_min;
 }
 
 /* find appropriate subdivided coordinates for absolute tile coordinate.

@@ -150,7 +150,7 @@ static const damage_type_id damage_bash( "bash" );
 static const damage_type_id damage_bullet( "bullet" );
 static const damage_type_id damage_cut( "cut" );
 
-static const dimension_id dimension_default( "default" );
+static const dimension_id dimension_world_default( "default" );
 
 static const efftype_id effect_riding( "riding" );
 
@@ -4105,7 +4105,7 @@ void mission::deserialize( const JsonObject &jo )
         dimension = dimension_id( jo.get_string( "dimension" ) );
     } else {
         // dimension is set as the main one
-        dimension = dimension_default;
+        dimension = dimension_world_default;
     }
 
     if( jo.has_string( "follow_up" ) ) {

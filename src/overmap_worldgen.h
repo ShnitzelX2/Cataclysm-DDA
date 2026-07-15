@@ -2,12 +2,16 @@
 
 #include "coordinates.h"
 #include "cuboid_rectangle.h"
+#include "point.h"
 #include "type_id.h"
-#include "weighted_list.h"
 
-#include <array>
 #include <memory>
+#include <string>
+#include <string_view>
 #include <unordered_map>
+
+class JsonObject;
+template <typename T> struct enum_traits;
 
 using Region_map = std::unordered_map<tripoint_abs_om, region_settings_id>;
 
@@ -46,7 +50,7 @@ class dimension_world
         dimension_region_layout_id get_region_layout() const {
             return region_layout;
         }
-        void load( const JsonObject &jo, const std::string &src );
+        void load( const JsonObject &jo, const std::string_view &src );
         void finalize();
         static void finalize_all();
         static void load_dimensions( const JsonObject &jo, const std::string &src );
@@ -58,6 +62,7 @@ class dimension_region_layout_generator
         // forward to child deserialize function based on `generation_mode`
         virtual void deserialize( const JsonObject &jo ) = 0;
     public:
+        virtual ~dimension_region_layout_generator() = default;
         // return the region for the given overmap
         virtual region_settings_id get_overmap_region( const tripoint_abs_om &om_point ) = 0;
         virtual bool is_static_generation() const = 0;
@@ -72,13 +77,13 @@ class dimension_region_layout_dynamic : public dimension_region_layout_generator
 {
 
         // forward to child deserialize function based on `generation_mode`
-        virtual void deserialize( const JsonObject &jo ) = 0;
+        void deserialize( const JsonObject &jo ) override = 0;
     public:
         // do dynamic region generation, called from get_overmap_region
         virtual void generate_dynamic( Region_map &placed_regions, const tripoint_abs_om &current_om ) = 0;
         // return the region for the given overmap
         region_settings_id get_overmap_region( const tripoint_abs_om &om_point ) override;
-        bool is_static_generation() const {
+        bool is_static_generation() const override {
             return false;
         }
 };
@@ -93,14 +98,14 @@ class dimension_region_layout_static : public dimension_region_layout_generator
         inclusive_cuboid<tripoint_abs_om> generated_bounds;
 
     public:
-        virtual void deserialize( const JsonObject &jo );
+        void deserialize( const JsonObject &jo ) override;
         virtual void generate_entire_layout( Region_map &placed_regions,
                                              const tripoint_abs_om &current_om ) = 0;
         region_settings_id get_overmap_region( const tripoint_abs_om &om_point ) override;
         bool overmap_in_bounds( const tripoint_abs_om &om_point ) {
             return generated_bounds.contains( om_point );
         };
-        bool is_static_generation() const {
+        bool is_static_generation() const override {
             return true;
         }
 };
@@ -110,7 +115,7 @@ class dimension_region_layout_generator_uniform : public dimension_region_layout
         region_settings_id uniform_region;
     public:
         void generate_dynamic( Region_map &placed_regions, const tripoint_abs_om &current_om ) override;
-        void deserialize( const JsonObject &jo );
+        void deserialize( const JsonObject &jo ) override;
 };
 
 
@@ -134,6 +139,6 @@ class dimension_region_layout
             return layout_generator;
         }
 
-        void load( const JsonObject &jo, const std::string &src );
+        void load( const JsonObject &jo, const std::string_view &src );
         static void load_dimension_regions( const JsonObject &jo, const std::string &src );
 };

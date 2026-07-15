@@ -96,7 +96,7 @@
 #   include <tchar.h>
 #endif
 
-static const dimension_id dimension_default( "default" );
+static const dimension_id dimension_world_default( "default" );
 
 static const mod_id MOD_INFORMATION_dda( "dda" );
 
@@ -968,7 +968,7 @@ cata_path PATH_INFO::dimensions_save_path()
 cata_path PATH_INFO::current_dimension_save_path()
 {
     dimension_id dimension_prefix = g->get_dimension_prefix();
-    if( dimension_prefix != dimension_default ) {
+    if( dimension_prefix != dimension_world_default ) {
         return PATH_INFO::dimensions_save_path() / dimension_prefix.str();
     }
     return PATH_INFO::world_base_save_path();

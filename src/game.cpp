@@ -255,7 +255,7 @@ static const damage_type_id damage_bash( "bash" );
 static const damage_type_id damage_cut( "cut" );
 static const damage_type_id damage_stab( "stab" );
 
-static const dimension_id dimension_default( "default" );
+static const dimension_id dimension_world_default( "default" );
 
 static const efftype_id effect_adrenaline_mycus( "adrenaline_mycus" );
 static const efftype_id effect_bouldering( "bouldering" );
@@ -789,7 +789,7 @@ bool game::start_game()
 
     init_autosave();
     //Needs to be explicitly reset so a previously loaded world state doesn't leak into the new game
-    dimension_prefix = dimension_default;
+    dimension_prefix = dimension_world_default;
     overmap_buffer.init_region_layout();
 
     background_pane background;
