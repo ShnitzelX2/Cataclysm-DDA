@@ -18,7 +18,7 @@
 #include "coords_fwd.h"  // IWYU pragma: export
 #include "cuboid_rectangle.h"
 #include "debug.h"
-#include "jc_voronoi.h"
+#include "jc_voronoi/jc_voronoi.h"
 #include "line.h"  // IWYU pragma: keep
 #include "map_iterator.h"
 #include "map_scale_constants.h"

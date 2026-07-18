@@ -6,7 +6,7 @@
 #include "generic_factory.h"
 #include "imgui/imgui.h"
 #define JC_VORONOI_IMPLEMENTATION
-#include "jc_voronoi.h"
+#include "jc_voronoi/jc_voronoi.h"
 #include "map_iterator.h"
 #include "output.h"
 #include "overmapbuffer.h"
