@@ -4,11 +4,15 @@
 #include "cuboid_rectangle.h"
 #include "point.h"
 #include "type_id.h"
+#include "units.h"
+#include "weighted_list.h"
 
 #include <memory>
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 class JsonObject;
 template <typename T> struct enum_traits;
@@ -143,7 +147,7 @@ class dimension_region_layout_generator_manual : public dimension_region_layout_
     public:
         void generate_entire_layout( Region_map &placed_regions,
                                      const tripoint_abs_om &current_om ) override;
-        void deserialize( const JsonObject &jo );
+        void deserialize( const JsonObject &jo ) override;
 };
 
 class dimension_region_layout_generator_random : public dimension_region_layout_dynamic
@@ -151,7 +155,7 @@ class dimension_region_layout_generator_random : public dimension_region_layout_
         weighted_int_list<region_settings_id> random_regions;
     public:
         void generate_dynamic( Region_map &placed_regions, const tripoint_abs_om &current_om ) override;
-        void deserialize( const JsonObject &jo );
+        void deserialize( const JsonObject &jo ) override;
 };
 
 class dimension_region_layout_generator_angles : public dimension_region_layout_dynamic
@@ -161,7 +165,7 @@ class dimension_region_layout_generator_angles : public dimension_region_layout_
         units::angle angles_offset = 0_degrees;
     public:
         void generate_dynamic( Region_map &placed_regions, const tripoint_abs_om &current_om ) override;
-        void deserialize( const JsonObject &jo );
+        void deserialize( const JsonObject &jo ) override;
         int get_sector_count() const {
             return static_cast<int>( angles_regions.size() );
         }

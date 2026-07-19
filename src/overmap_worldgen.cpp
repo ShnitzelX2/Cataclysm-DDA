@@ -1,3 +1,4 @@
+#include "cata_utility.h"
 #include "coordinates.h"
 #include "debug.h"
 #include "enum_conversions.h"
@@ -5,16 +6,22 @@
 #include "game.h"
 #include "generic_factory.h"
 #include "imgui/imgui.h"
-#define JC_VORONOI_IMPLEMENTATION
+
+// IWYU pragma: begin_keep
+#define JC_VORONOI_IMPLEMENTATION // NOLINT(clang-diagnostic-unused-macros)
+// IWYU pragma: end_keep
 #include "jc_voronoi/jc_voronoi.h"
+#include "line.h"
 #include "map_iterator.h"
 #include "output.h"
-#include "overmapbuffer.h"
 #include "overmap_worldgen.h"
+#include "overmapbuffer.h"
+#include "rng.h"
 #include "string_formatter.h"
 #include "translations.h"
 #include "units.h"
 
+#include <cstring>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -105,7 +112,7 @@ void dimension_region_layout_generator_uniform::generate_dynamic(
 }
 
 void dimension_region_layout_generator_manual::generate_entire_layout(
-    Region_map &placed_regions, const tripoint_abs_om &current_om )
+    Region_map &placed_regions, const tripoint_abs_om & )
 {
     std::vector<region_voronoi_point> region_points;
     for( const region_point_set &rps : region_point_sets ) {
