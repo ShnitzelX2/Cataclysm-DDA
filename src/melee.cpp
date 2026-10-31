@@ -1976,9 +1976,23 @@ item_location Character::best_shield()
     // "BLOCK_WHILE_WORN" without a blocking tech need to be worn for the bonus
     best_value = best_value == 2 ? 0 : best_value;
     item_location best = best_value > 0 ? get_wielded_item() : item_location();
-    item *best_worn = worn.best_shield();
-    if( best_worn && melee::blocking_ability( *best_worn ) >= best_value ) {
-        best = item_location( *this, best_worn );
+
+    int best_shield_val = 0;
+    item_location best_shield = item_location::nowhere;
+    auto visit_best_shield = [&best_shield_val, &best_shield]( const item_location & loc ) {
+
+        const int block = melee::blocking_ability( *loc );
+        if( loc->has_flag( flag_BLOCK_WHILE_WORN ) && block >= best_shield_val ) {
+            best_shield_val = block;
+            best_shield = loc;
+        }
+        return VisitResponse::NEXT;
+    };
+
+    worn.visit_items( *this, visit_best_shield );
+
+    if( best_shield && melee::blocking_ability( *best_shield ) >= best_value ) {
+        best = best_shield;
     }
 
     return best;

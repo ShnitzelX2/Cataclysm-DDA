@@ -2164,20 +2164,6 @@ std::vector<item> outfit::available_pockets() const
     return avail_pockets;
 }
 
-item *outfit::best_shield()
-{
-    int best_val = 0;
-    item *ret = nullptr;
-    for( item &shield : worn ) {
-        const int block = melee::blocking_ability( shield );
-        if( shield.has_flag( flag_BLOCK_WHILE_WORN ) && block >= best_val ) {
-            best_val = block;
-            ret = &shield;
-        }
-    }
-    return ret;
-}
-
 item *outfit::current_unarmed_weapon( const sub_bodypart_str_id &contact_area )
 {
     item *cur_weapon = &null_item_reference();
