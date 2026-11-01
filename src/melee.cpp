@@ -802,9 +802,8 @@ bool Character::melee_attack_abstract( Creature &t, bool allow_special,
             // so only cur_weapon = worn.current_unarmed_weapon remains
             // Check if our vector allows armor-derived damage
             if( vector_id->armor_bonus ) {
-                item *worn_weap = worn.current_unarmed_weapon( contact_area );
-                cur_weapon = worn_weap ? item_location( *this, worn_weap ) : item_location();
-                cur_weap = cur_weapon ? *cur_weapon : null_item_reference();
+                item_location worn_weap = current_unarmed_weapon( contact_area );
+                cur_weap = worn_weap.valid() ? *worn_weap : null_item_reference();
                 add_msg_debug( debugmode::DF_MELEE, "Vector allows armor damage calculation, chosen weapon %s",
                                cur_weap.display_name() );
             }

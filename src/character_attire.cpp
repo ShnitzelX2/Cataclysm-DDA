@@ -606,11 +606,6 @@ item Character::item_worn_with_flag( const flag_id &f ) const
     return worn.item_worn_with_flag( f );
 }
 
-item *Character::item_worn_with_id( const itype_id &i )
-{
-    return worn.item_worn_with_id( i );
-}
-
 bool Character::wearing_something_on( const bodypart_id &bp ) const
 {
     return worn.wearing_something_on( bp );
@@ -1103,16 +1098,20 @@ item outfit::item_worn_with_flag( const flag_id &f ) const
     return it_with_flag;
 }
 
-item *outfit::item_worn_with_id( const itype_id &i )
+item_location Character::item_worn_with_id( const itype_id &match_itype ) const
 {
-    item *it_with_id = nullptr;
-    for( item &it : worn ) {
-        if( it.typeId() == i ) {
-            it_with_id = &it;
-            break;
+    item_location matching_itype_loc = item_location::nowhere;
+
+    auto visit_matching_id = [&matching_itype_loc, &match_itype]( const item_location & loc ) {
+        if( loc->typeId() == match_itype ) {
+            matching_itype_loc = loc;
+            return VisitResponse::ABORT;
         }
-    }
-    return it_with_id;
+        return VisitResponse::NEXT;
+    };
+    worn.visit_items( *this, visit_matching_id );
+
+    return matching_itype_loc;
 }
 
 std::list<item_location> outfit::get_visible_worn_items( const Character &guy )
@@ -2164,19 +2163,25 @@ std::vector<item> outfit::available_pockets() const
     return avail_pockets;
 }
 
-item *outfit::current_unarmed_weapon( const sub_bodypart_str_id &contact_area )
+item_location Character::current_unarmed_weapon( const sub_bodypart_str_id &contact_area ) const
 {
-    item *cur_weapon = &null_item_reference();
-    for( item &worn_item : worn ) {
-        bool covers = worn_item.covers( contact_area );
+    item_location current_unarmed_weapon = item_location::nowhere;
+
+    auto find_current_unarmed_weapon = [&current_unarmed_weapon,
+    &contact_area]( const item_location & loc ) {
+        bool covers = loc->covers( contact_area );
         // Uses enum layer_level to make distinction for top layer.
         if( covers ) {
-            if( cur_weapon->is_null() || ( worn_item.get_layer() >= cur_weapon->get_layer() ) ) {
-                cur_weapon = &worn_item;
+            if( !current_unarmed_weapon.valid() ||
+                ( loc->get_layer() >= current_unarmed_weapon->get_layer() ) ) {
+                current_unarmed_weapon = loc;
             }
         }
-    }
-    return cur_weapon;
+        return VisitResponse::NEXT;
+    };
+    visit_items( find_current_unarmed_weapon );
+
+    return current_unarmed_weapon;
 }
 
 void outfit::prepare_bodymap_info( bodygraph_info &info, const bodypart_id &bp,

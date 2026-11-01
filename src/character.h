@@ -2552,8 +2552,10 @@ class Character : public Creature, public visitable
         /** Returns the first worn item with a given flag. */
         item item_worn_with_flag( const flag_id &flag, const bodypart_id &bp ) const;
         item item_worn_with_flag( const flag_id &flag ) const;
-        /** Returns pointer of the first worn item with a given id. */
-        item *item_worn_with_id( const itype_id &id );
+        /** Returns the first worn item with a given id. */
+        item_location item_worn_with_id( const itype_id &match_itype ) const;
+        // find the best clothing weapon when unarmed modifies
+        item_location current_unarmed_weapon( const sub_bodypart_str_id &contact_area ) const;
 
         // drawing related stuff
         /**

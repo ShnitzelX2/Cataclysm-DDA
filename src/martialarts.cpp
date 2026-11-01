@@ -1670,8 +1670,8 @@ damage_instance character_martial_arts::calculate_vector_damage( const Character
     // Add any bonus from worn armor if the vector allows it
     if( vec->armor_bonus ) {
         outfit current_worn = user.worn;
-        item *unarmed_weapon = current_worn.current_unarmed_weapon( contact_area );
-        if( unarmed_weapon != nullptr ) {
+        item_location unarmed_weapon = user.current_unarmed_weapon( contact_area );
+        if( unarmed_weapon.valid() ) {
             ret.add( unarmed_weapon->base_damage_melee() );
             add_msg_debug( debugmode::DF_MELEE,
                            "Unarmed weapon %s found, melee damage %.1f, new total damage %.1f",

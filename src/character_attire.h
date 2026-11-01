@@ -108,10 +108,7 @@ class outfit
         bool is_barefoot() const;
         item item_worn_with_flag( const flag_id &f, const bodypart_id &bp ) const;
         item item_worn_with_flag( const flag_id &f ) const;
-        item *item_worn_with_id( const itype_id &i );
         std::optional<const item *> item_worn_with_inv_let( char invlet ) const;
-        // find the best clothing weapon when unarmed modifies
-        item *current_unarmed_weapon( const sub_bodypart_str_id &contact_area );
         item_location first_item_covering_bp( Character &guy, bodypart_id bp );
         void inv_dump( std::vector<item *> &ret );
         void inv_dump( std::vector<const item *> &ret ) const;
