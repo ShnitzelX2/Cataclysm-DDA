@@ -109,7 +109,6 @@ class outfit
         item item_worn_with_flag( const flag_id &f, const bodypart_id &bp ) const;
         item item_worn_with_flag( const flag_id &f ) const;
         std::optional<const item *> item_worn_with_inv_let( char invlet ) const;
-        item_location first_item_covering_bp( Character &guy, bodypart_id bp );
         void inv_dump( std::vector<item *> &ret );
         void inv_dump( std::vector<const item *> &ret ) const;
         /** Applies encumbrance from items only

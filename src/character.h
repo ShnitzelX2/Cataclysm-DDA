@@ -2556,6 +2556,7 @@ class Character : public Creature, public visitable
         item_location item_worn_with_id( const itype_id &match_itype ) const;
         // find the best clothing weapon when unarmed modifies
         item_location current_unarmed_weapon( const sub_bodypart_str_id &contact_area ) const;
+        item_location first_item_covering_bp( bodypart_id bp ) const;
 
         // drawing related stuff
         /**

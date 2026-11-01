@@ -2544,14 +2544,20 @@ bool outfit::hands_conductive() const
     return true;
 }
 
-item_location outfit::first_item_covering_bp( Character &guy, bodypart_id bp )
+item_location Character::first_item_covering_bp( bodypart_id bp ) const
 {
-    for( item &clothing : worn ) {
-        if( clothing.covers( bp ) ) {
-            return item_location( guy, &clothing );
+    item_location first_item = item_location::nowhere;
+    auto first_item_covering = [&first_item, &bp]( const item_location & loc ) {
+        if( loc->covers( bp ) ) {
+            first_item = loc;
+            return VisitResponse::ABORT;
         }
-    }
-    return item_location{};
+        return VisitResponse::NEXT;
+    };
+
+    worn.visit_items( *this, first_item_covering );
+
+    return first_item;
 }
 
 std::optional<int> outfit::get_item_position( const item &it ) const

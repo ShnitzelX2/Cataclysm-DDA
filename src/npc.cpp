@@ -1587,7 +1587,7 @@ bool npc::wear_if_wanted( const item &it, std::string &reason )
                 continue;
             }
             // Find an item that covers the same body part as the new item
-            item_location armor_covering = worn.first_item_covering_bp( *this, bp );
+            item_location armor_covering = first_item_covering_bp( bp );
             if( armor_covering && !( is_limb_broken( bp ) && armor_covering->has_flag( flag_SPLINT ) ) ) {
                 //create an item_location for player::takeoff to handle.
                 took_off = takeoff( armor_covering );
