@@ -275,12 +275,6 @@ ret_val<void> Character::can_wear( const item &it, bool with_equip_change ) cons
 }
 
 std::optional<std::list<item>::iterator>
-Character::wear( int pos, bool interactive )
-{
-    return wear( item_location( *this, &i_at( pos ) ), interactive );
-}
-
-std::optional<std::list<item>::iterator>
 Character::wear( item_location item_wear, bool interactive )
 {
     item &to_wear = *item_wear;
@@ -568,12 +562,6 @@ bool Character::takeoff( item_location loc, std::list<item> *res )
     } else {
         return false;
     }
-}
-
-bool Character::takeoff( int pos )
-{
-    item_location loc = item_location( *this, &i_at( pos ) );
-    return takeoff( loc );
 }
 
 bool Character::is_wearing( const itype_id &it ) const
@@ -2558,17 +2546,6 @@ item_location Character::first_item_covering_bp( bodypart_id bp ) const
     worn.visit_items( *this, first_item_covering );
 
     return first_item;
-}
-
-const item &outfit::i_at( int position ) const
-{
-    if( static_cast<size_t>( position ) < worn.size() ) {
-        auto iter = worn.begin();
-        std::advance( iter, position );
-        return *iter;
-    } else {
-        return null_item_reference();
-    }
 }
 
 std::string outfit::get_armor_display( bodypart_id bp ) const
